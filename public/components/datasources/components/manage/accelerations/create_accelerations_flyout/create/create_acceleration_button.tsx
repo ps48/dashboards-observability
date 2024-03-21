@@ -39,7 +39,7 @@ export const CreateAccelerationButton = ({
 
     const requestPayload: DirectQueryRequest = {
       lang: 'sql',
-      query: accelerationQueryBuilder(accelerationFormData),
+      query: accelerationQueryBuilder(accelerationFormData).replaceAll(/\s+/g, ' '),
       datasource: accelerationFormData.dataSource,
     };
 

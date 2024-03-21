@@ -24,7 +24,7 @@ export const buildIndexOptions = (accelerationformData: CreateAccelerationForm) 
 
   // Add index settings option
   indexOptions.push(
-    `index_settings = '{"number_of_shards":${primaryShardsCount},"number_of_replicas":${replicaShardsCount}}'`
+    `index_settings = '{\\"number_of_shards\\":${primaryShardsCount},\\"number_of_replicas\\":${replicaShardsCount}}'`
   );
 
   // Add auto refresh option
