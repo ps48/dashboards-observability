@@ -11,9 +11,9 @@ import {
 import {
   AccelerationsCacheData,
   CachedAccelerationByDataSource,
+  CachedDatabase,
   CachedDataSource,
   CachedDataSourceStatus,
-  CachedDatabase,
   CachedTable,
   DataSourceCacheData,
 } from '../../../common/types/data_connections';
@@ -31,6 +31,21 @@ export class CatalogCacheManager {
    * Key for the accelerations cache in local storage.
    */
   private static readonly accelerationsCacheKey = ASYNC_QUERY_ACCELERATIONS_CACHE;
+
+  static isTimeDifferenceLessThanOneHour(timestamp1: string, timestamp2: string): boolean {
+    // Convert timestamp strings to Date objects
+    const time1 = new Date(timestamp1).getTime();
+    const time2 = new Date(timestamp2).getTime();
+
+    // Calculate the absolute time difference in milliseconds
+    const timeDifference = Math.abs(time2 - time1);
+
+    // Convert milliseconds to hours
+    const timeDifferenceInHours = timeDifference / (1000 * 60 * 60);
+
+    // Check if the time difference is less than 1 hour
+    return timeDifferenceInHours < 1;
+  }
 
   /**
    * Saves data source cache to local storage.
@@ -111,8 +126,13 @@ export class CatalogCacheManager {
   ): CachedAccelerationByDataSource {
     const accCacheData = this.getAccelerationsCache();
     const cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
+    const currentTime = new Date().toUTCString();
 
-    if (cachedDataSource) return cachedDataSource;
+    if (
+      cachedDataSource &&
+      this.isTimeDifferenceLessThanOneHour(cachedDataSource.lastUpdated, currentTime)
+    )
+      return cachedDataSource;
     else {
       const defaultDataSourceObject = {
         name: dataSourceName,
@@ -152,7 +172,11 @@ export class CatalogCacheManager {
     const cachedDataSource = cacheData.dataSources.find(
       (ds: CachedDataSource) => ds.name === dataSourceName
     );
-    if (cachedDataSource) {
+    const currentTime = new Date().toUTCString();
+    if (
+      cachedDataSource &&
+      this.isTimeDifferenceLessThanOneHour(cachedDataSource.lastUpdated, currentTime)
+    ) {
       return cachedDataSource;
     } else {
       const defaultDataSourceObject = {
