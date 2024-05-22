@@ -44,7 +44,7 @@ interface TraceViewProps extends TraceAnalyticsCoreDeps {
   dataSourceMDSId: DataSourceOption[];
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
-  tenant?: string;
+  tenant?: string | undefined;
 }
 
 export function TraceView(props: TraceViewProps) {

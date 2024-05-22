@@ -20,7 +20,9 @@ import {
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
+import { loadTenantInfo } from './components/common/indices';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { TraceView, Traces } from './components/traces';
@@ -29,8 +31,6 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
-import { loadTenantInfo } from './components/common/indices';
-import { PublicConfig } from '../../plugin';
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -43,9 +43,7 @@ export interface TraceAnalyticsCoreDeps {
   savedObjectsMDSClient: SavedObjectsStart;
 }
 
-interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {
-  config: PublicConfig;
-}
+interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
 
 export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
@@ -108,7 +106,7 @@ export const Home = (props: HomeProps) => {
 
   useEffect(() => {
     if (!tenantLoaded)
-      loadTenantInfo(props.http, props.config.multitenancy.enabled).then((tenant) => {
+      loadTenantInfo(props.http, coreRefs.traceMultitenancyEnabled!).then((tenant) => {
         setTenantLoaded(true);
         setTenantName(tenant);
         handleDataPrepperIndicesExistRequest(
@@ -119,7 +117,7 @@ export const Home = (props: HomeProps) => {
         );
         handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, tenant);
       });
-  }, [props.config.multitenancy.enabled, tenantLoaded, dataSourceMDSId]);
+  }, [coreRefs.traceMultitenancyEnabled!, tenantLoaded, dataSourceMDSId]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },

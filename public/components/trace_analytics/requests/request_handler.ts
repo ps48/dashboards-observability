@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getTenantIndexName } from '../../../../common/utils/tenant_index_name';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   DATA_PREPPER_INDEX_NAME,
@@ -12,6 +11,7 @@ import {
   TRACE_ANALYTICS_DSL_ROUTE,
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
 } from '../../../../common/constants/trace_analytics';
+import { getTenantIndexName } from '../../../../common/utils/tenant_index_name';
 import { TraceAnalyticsMode } from '../home';
 
 export async function handleDslRequest(
@@ -71,7 +71,7 @@ export async function handleDslRequest(
 
 export async function handleJaegerIndicesExistRequest(
   http: CoreStart['http'],
-  setJaegerIndicesExist,
+  setJaegerIndicesExist: (val: boolean) => void,
   dataSourceMDSId?: string,
   tenant?: string
 ) {
@@ -91,7 +91,7 @@ export async function handleJaegerIndicesExistRequest(
 
 export async function handleDataPrepperIndicesExistRequest(
   http: CoreStart['http'],
-  setDataPrepperIndicesExist,
+  setDataPrepperIndicesExist: (val: boolean) => void,
   dataSourceMDSId?: string,
   tenant?: string
 ) {

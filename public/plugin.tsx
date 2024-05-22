@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { i18n } from '@osd/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
@@ -97,14 +97,14 @@ import {
   SetupDependencies,
 } from './types';
 
-export interface PublicConfig {
+interface PublicConfig {
   query_assist: {
     enabled: boolean;
   };
   summarize: {
     enabled: boolean;
   };
-  multitenancy: {
+  traceMultitenancy: {
     enabled: boolean;
   };
 }
@@ -269,8 +269,7 @@ export class ObservabilityPlugin
         startPage,
         dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
         dataSourceManagement,
-        coreStart.savedObjects,
-        this.config
+        coreStart.savedObjects
       );
     };
 
@@ -403,6 +402,7 @@ export class ObservabilityPlugin
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
+    coreRefs.traceMultitenancyEnabled = this.config.traceMultitenancy.enabled;
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
 

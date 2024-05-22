@@ -15,17 +15,15 @@ import {
   TRACE_ANALYTICS_DSL_ROUTE,
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
 } from '../../common/constants/trace_analytics';
-import { addRequestToMetric } from '../common/metrics/metrics_helper';
 import { getTenantIndexName } from '../../common/utils/tenant_index_name';
+import { addRequestToMetric } from '../common/metrics/metrics_helper';
 
 export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabled: boolean) {
   router.post(
     {
       path: TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE,
       validate: {
-        body: schema.object({
-          tenant: schema.maybe(schema.string()),
-        }),
+        body: schema.any(),
         query: schema.object({
           dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
         }),
@@ -68,9 +66,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
     {
       path: TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
       validate: {
-        body: schema.object({
-          tenant: schema.maybe(schema.string()),
-        }),
+        body: schema.any(),
         query: schema.object({
           dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
         }),
@@ -148,7 +144,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
     },
     async (context, request, response) => {
       addRequestToMetric('trace_analytics', 'get', 'count');
-      const { index, size, ...rest } = request.body;
+      const { index, size, tenant, ...rest } = request.body;
       const { dataSourceMDSId } = request.query;
       const params: RequestParams.Search = {
         index: index || getTenantIndexName(DATA_PREPPER_INDEX_NAME, tenant),
