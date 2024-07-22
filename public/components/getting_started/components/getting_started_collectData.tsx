@@ -30,7 +30,7 @@ import pythonJson from '../getting_started_artifacts/python_client/python_client
 // import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
 
 import { IntegrationCards } from './getting_started_integrationCards';
-import { uploadAssets } from './utils';
+import { fetchDashboardIds } from './utils';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -271,9 +271,12 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </EuiListGroup>
       <EuiButton
         onClick={async () => {
-          // setSaveMessage('Pattern created successfully');
-          // setTimeout(() => setSaveMessage(null), 3000);
-          await uploadAssets();
+          try {
+            // pass in the TutorialId here
+            await fetchDashboardIds('python');
+          } catch (error) {
+            setSaveMessage('Pattern created successfully');
+          }
         }}
       >
         Create Pattern

@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
+  EuiCard,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
   EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 import { coreRefs } from '../../../../public/framework/core_refs';
 
 interface QueryAndAnalyzeProps {
@@ -39,9 +39,15 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
 }) => {
   const [searchValue, setSearchValue] = useState<string>('');
 
-  const redirectToExplorer = (path: string) => {
+  const redirectToDashboards = (path: string) => {
     coreRefs?.application!.navigateToApp('dashboards', {
       path: `#/${path}`,
+    });
+  };
+
+  const redirectToDiscover = (indexPatternId: string) => {
+    coreRefs?.application!.navigateToApp('data-explorer', {
+      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${indexPatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
     });
   };
 
@@ -96,7 +102,8 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
               title={selectedTechnology}
               description={`Explore the ${selectedTechnology} dashboard`}
               onClick={() => {
-                redirectToExplorer(currentPath);
+                // redirectToDashboards(currentPath);
+                redirectToDiscover('71d16e20-1ded-11ef-a919-b1b4f3002b90');
               }}
             />
           </EuiFlexItem>
@@ -106,7 +113,7 @@ export const QueryAndAnalyze: React.FC<QueryAndAnalyzeProps> = ({
               title="Create New Dashboard"
               description="Create a new dashboard to visualize your data"
               onClick={() => {
-                redirectToExplorer('dashboards');
+                redirectToDashboards('dashboards');
               }}
             />
           </EuiFlexItem>
