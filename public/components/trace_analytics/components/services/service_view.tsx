@@ -405,13 +405,13 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.endTime, mode)
     );
     if (mode === 'data_prepper') {
-      spanDSL.query.bool.must.push({
+      spanDSL.query.bool.filter.push({
         term: {
           serviceName: props.serviceName,
         },
       });
     } else if (mode === 'jaeger') {
-      spanDSL.query.bool.must.push({
+      spanDSL.query.bool.filter.push({
         term: {
           'process.serviceName': props.serviceName,
         },
@@ -419,7 +419,7 @@ export function ServiceView(props: ServiceViewProps) {
     }
     spanFilters.map(({ field, value }) => {
       if (value != null) {
-        spanDSL.query.bool.must.push({
+        spanDSL.query.bool.filter.push({
           term: {
             [field]: value,
           },
