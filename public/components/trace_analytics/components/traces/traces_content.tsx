@@ -26,7 +26,8 @@ export function TracesContent(props: TracesProps) {
     startTime,
     endTime,
     childBreadcrumbs,
-    traceIdColumnAction,
+    getTraceViewUri,
+    openTraceFlyout,
     setQuery,
     setFilters,
     setStartTime,
@@ -143,7 +144,8 @@ export function TracesContent(props: TracesProps) {
         refresh={refresh}
         mode={mode}
         loading={loading}
-        traceIdColumnAction={traceIdColumnAction}
+        getTraceViewUri={getTraceViewUri}
+        openTraceFlyout={openTraceFlyout}
         jaegerIndicesExist={jaegerIndicesExist}
         dataPrepperIndicesExist={dataPrepperIndicesExist}
       />

@@ -311,8 +311,6 @@ export function Application(props: AppDetailProps) {
     setSelectedTab(TAB_TRACE_ID);
   };
 
-  const traceIdColumnAction = (item: any) => openTraceFlyout(item);
-
   const getTrace = () => {
     return (
       <>
@@ -322,7 +320,7 @@ export function Application(props: AppDetailProps) {
           page="app"
           parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
-          traceIdColumnAction={traceIdColumnAction}
+          openTraceFlyout={openTraceFlyout}
           startTime={appStartTime}
           endTime={appEndTime}
           setStartTime={setStartTimeForApp}
