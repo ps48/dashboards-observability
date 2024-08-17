@@ -23,6 +23,7 @@ import { setupRoutes } from './routes/index';
 import {
   notebookSavedObject,
   searchSavedObject,
+  traceSourceSavedObject,
   visualizationSavedObject,
 } from './saved_objects/observability_saved_object';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
@@ -220,6 +221,7 @@ export class ObservabilityPlugin
     core.savedObjects.registerType(visualizationSavedObject);
     core.savedObjects.registerType(searchSavedObject);
     core.savedObjects.registerType(notebookSavedObject);
+    core.savedObjects.registerType(traceSourceSavedObject);
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,
@@ -228,6 +230,7 @@ export class ObservabilityPlugin
 
     assistantDashboards?.registerMessageParser(PPLParsers);
 
+    // registerObservabilityUISettings(core.uiSettings);
     return {};
   }
 

@@ -8,6 +8,7 @@ import { observabilityLogsID, observabilityNotebookID } from '../../common/const
 import {
   NOTEBOOK_SAVED_OBJECT,
   SEARCH_SAVED_OBJECT,
+  TRACE_SOURCE_SAVED_OBJECT,
   VISUALIZATION_SAVED_OBJECT,
 } from '../../common/types/observability_saved_object_attributes';
 
@@ -64,6 +65,33 @@ export const searchSavedObject: SavedObjectsType = {
         path: editUrl,
         uiCapabilitiesPath: 'observability.show',
       };
+    },
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: {
+        type: 'text',
+      },
+      description: {
+        type: 'text',
+      },
+      version: { type: 'integer' },
+    },
+  },
+  migrations: {},
+};
+
+export const traceSourceSavedObject: SavedObjectsType = {
+  name: TRACE_SOURCE_SAVED_OBJECT,
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    defaultSearchField: 'title',
+    icon: 'apmTrace',
+    importableAndExportable: true,
+    getTitle(obj) {
+      return obj.attributes.title;
     },
   },
   mappings: {

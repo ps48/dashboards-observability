@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+} from '@elastic/eui';
 import React, { useState } from 'react';
+import { ObservabilitySavedTraceSources } from '../../../../services/saved_objects/saved_object_client/types';
 import { TraceAnalyticsMode } from '../../home';
-
-const labels = new Map([
-  ['jaeger', 'Jaeger'],
-  ['data_prepper', 'Data Prepper'],
-]);
+import { CustomIndexFlyout } from '../common/custom_index_flyout';
 
 export function DataSourcePicker(props: {
   modes: {
@@ -22,6 +25,30 @@ export function DataSourcePicker(props: {
 }) {
   const { modes, selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [savedTraceSources, setSavedTraceSources] = useState<Array<ObservabilitySavedTraceSources>>(
+    []
+  );
+
+  let labels = new Map([
+    ['jaeger', 'Jaeger'],
+    ['data_prepper', 'Data Prepper'],
+  ]);
+
+  // const loadSavedTraceSources = () => {
+  //   OSDSavedTraceSourceClient.getInstance()
+  //     .getBulk()
+  //     .then((res) => {
+  //       setSavedTraceSources(res.observabilityObjectList);
+  //       res.observabilityObjectList.forEach((object) => {
+  //         labels.set();
+  //       });
+  //     });
+  // };
+
+  // useEffect(() => {
+  //   loadSavedTraceSources();
+  // }, [OSDSavedTraceSourceClient]);
 
   const trigger = {
     label: labels.get(selectedMode),
@@ -60,7 +87,7 @@ export function DataSourcePicker(props: {
         ownFocus
       >
         <div className="popOverContainer">
-          <EuiPopoverTitle>{'Choose data type'}</EuiPopoverTitle>
+          <EuiPopoverTitle>{'Choose data schema'}</EuiPopoverTitle>
           <EuiSelectable
             data-test-subj="indexPattern-switcher"
             searchable
@@ -70,10 +97,10 @@ export function DataSourcePicker(props: {
               key: x.id,
               value: x.id,
               checked: x.id === selectedMode ? 'on' : undefined,
-              "data-test-subj": x.id + '-mode',
+              'data-test-subj': x.id + '-mode',
             }))}
             onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
+              const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
                 label: string;
                 key: TraceAnalyticsMode;
@@ -93,8 +120,21 @@ export function DataSourcePicker(props: {
               </>
             )}
           </EuiSelectable>
+          <EuiButton
+            onClick={() => {
+              setIsFlyoutVisible(true);
+              setPopoverIsOpen(false);
+            }}
+            size="s"
+          >
+            Add custom trace source
+          </EuiButton>
         </div>
       </EuiPopover>
+      <CustomIndexFlyout
+        isFlyoutVisible={isFlyoutVisible}
+        setIsFlyoutVisible={setIsFlyoutVisible}
+      />
     </>
   );
 }

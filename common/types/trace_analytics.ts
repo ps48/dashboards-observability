@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SavedObjectAttributes } from '../../../../src/core/types';
+import { TraceAnalyticsMode } from '../../public/components/trace_analytics/home';
+
 export type SpanField =
   | 'SPAN_ID'
   | 'PARENT_SPAN_ID'
@@ -52,3 +55,13 @@ export interface GraphVisEdge {
   to: number;
   color: string;
 }
+
+export interface TraceSource extends SavedObjectAttributes {
+  name: string;
+  description: string;
+  type: TraceAnalyticsMode;
+  spanIndices: string;
+  serviceIndices: string;
+}
+
+export const SAVED_TRACESOURCE = 'traceSource';
