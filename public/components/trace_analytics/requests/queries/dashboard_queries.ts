@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 
 export const getDashboardQuery = () => {
   return {

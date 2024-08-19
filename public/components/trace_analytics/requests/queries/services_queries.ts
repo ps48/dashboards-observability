@@ -9,9 +9,9 @@ import {
   SERVICE_MAP_MAX_EDGES,
   SERVICE_MAP_MAX_NODES,
 } from '../../../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { getServiceMapTargetResources } from '../../components/common/helper_functions';
 import { ServiceObject } from '../../components/common/plots/service_map';
-import { TraceAnalyticsMode } from '../../home';
 
 export const getServicesQuery = (
   mode: TraceAnalyticsMode,

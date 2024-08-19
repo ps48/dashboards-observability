@@ -23,7 +23,7 @@ import round from 'lodash/round';
 import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import {
   MissingConfigurationMessage,
   NoMatchMessage,

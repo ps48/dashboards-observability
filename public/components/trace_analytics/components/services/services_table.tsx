@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import truncate from 'lodash/truncate';
 import React, { useMemo } from 'react';
-import { ServiceTrends } from '../../../../../common/types/trace_analytics';
-import { TraceAnalyticsMode } from '../../home';
+import { ServiceTrends, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { FilterType } from '../common/filters/filters';
 import {
   MissingConfigurationMessage,

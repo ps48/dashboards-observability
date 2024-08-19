@@ -21,5 +21,23 @@ export const TRACE_ANALYTICS_JAEGER_INDICES_ROUTE =
 export const TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE =
   '/api/observability/trace_analytics/data_prepper_indices';
 export const TRACE_ANALYTICS_DSL_ROUTE = '/api/observability/trace_analytics/query';
-export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpanIndices';
-export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServicesIndices';
+// export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpanIndices';
+// export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServicesIndices';
+
+export const modes = [
+  { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
+  { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
+];
+
+export const traceSchemaOptions = [
+  {
+    value: 'data_pepper',
+    inputDisplay: 'Data Prepper',
+    'data-test-subj': 'option-data-pepper',
+  },
+  {
+    value: 'jaeger',
+    inputDisplay: 'Jaeger',
+    'data-test-subj': 'option-jaeger',
+  },
+];

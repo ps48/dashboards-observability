@@ -16,9 +16,12 @@ import {
   JAEGER_SERVICE_INDEX_NAME,
   TRACE_ANALYTICS_DOCUMENTATION_LINK,
 } from '../../../../../common/constants/trace_analytics';
-import { GraphVisEdge, GraphVisNode } from '../../../../../common/types/trace_analytics';
+import {
+  GraphVisEdge,
+  GraphVisNode,
+  TraceAnalyticsMode,
+} from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
-import { TraceAnalyticsMode } from '../../home';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';

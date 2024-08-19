@@ -9,7 +9,7 @@ import {
   TRACE_SOURCE_SAVED_OBJECT,
   TraceSourceSavedObjectAttributes,
 } from '../../../../../common/types/observability_saved_object_attributes';
-import { TraceSourceType } from '../../../../../common/types/trace_analytics';
+import { TraceSource } from '../../../../../common/types/trace_analytics';
 import { getOSDSavedObjectsClient } from '../../../../../common/utils';
 import {
   SavedObjectsDeleteBulkParams,
@@ -21,16 +21,8 @@ import {
 import { OSDSavedObjectClient } from './osd_saved_object_client';
 import { OSDSavedObjectCreateResponse, OSDSavedObjectUpdateResponse } from './types';
 
-interface CommonParams {
-  name: string;
-  description: string;
-  type: TraceSourceType;
-  spanIndices: string;
-  serviceIndices: string;
-}
-
-type CreateParams = CommonParams;
-type UpdateParams = CommonParams & { objectId: string };
+type CreateParams = TraceSource;
+type UpdateParams = TraceSource & { objectId: string };
 
 export class OSDSavedTraceSourceClient extends OSDSavedObjectClient {
   private static instance: OSDSavedTraceSourceClient;
@@ -42,14 +34,7 @@ export class OSDSavedTraceSourceClient extends OSDSavedObjectClient {
   async create(
     params: CreateParams
   ): Promise<OSDSavedObjectCreateResponse<TraceSourceSavedObjectAttributes>> {
-    const body = {
-      name: params.name,
-      description: params.description,
-      type: params.type,
-      spanIndices: params.spanIndices,
-      serviceIndices: params.serviceIndices,
-    };
-
+    console.log('params :', params);
     const response = await this.client.create<TraceSourceSavedObjectAttributes>(
       TRACE_SOURCE_SAVED_OBJECT,
       {
@@ -58,7 +43,7 @@ export class OSDSavedTraceSourceClient extends OSDSavedObjectClient {
         version: SAVED_OBJECT_VERSION,
         createdTimeMs: new Date().getTime(),
         traceSource: {
-          ...body,
+          ...params,
         },
       }
     );
@@ -72,14 +57,6 @@ export class OSDSavedTraceSourceClient extends OSDSavedObjectClient {
   async update(
     params: UpdateParams
   ): Promise<OSDSavedObjectUpdateResponse<TraceSourceSavedObjectAttributes>> {
-    const body = {
-      name: params.name,
-      description: params.description,
-      type: params.type,
-      spanIndices: params.spanIndices,
-      serviceIndices: params.serviceIndices,
-    };
-
     const response = await this.client.update<Partial<TraceSourceSavedObjectAttributes>>(
       TRACE_SOURCE_SAVED_OBJECT,
       OSDSavedObjectClient.extractTypeAndUUID(params.objectId).uuid,
@@ -88,7 +65,7 @@ export class OSDSavedTraceSourceClient extends OSDSavedObjectClient {
         description: params.description,
         version: SAVED_OBJECT_VERSION,
         traceSource: {
-          ...body,
+          ...params,
         },
       }
     );
@@ -99,7 +76,7 @@ export class OSDSavedTraceSourceClient extends OSDSavedObjectClient {
     };
   }
 
-  updateBulk(params: unknown): Promise<Array<Promise<unknown>>> {
+  updateBulk(_params: unknown): Promise<Array<Promise<unknown>>> {
     throw new Error('Method not implemented.');
   }
 

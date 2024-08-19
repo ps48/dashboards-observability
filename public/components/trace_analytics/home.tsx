@@ -19,7 +19,8 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/trace_analytics';
+import { DATA_PREPPER_INDEX_NAME, modes } from '../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode } from '../../../common/types/trace_analytics';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
@@ -48,8 +49,6 @@ export interface TraceAnalyticsCoreDeps {
 }
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
-
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
@@ -166,10 +165,10 @@ export const Home = (props: HomeProps) => {
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
   }, [dataSourceMDSId]);
 
-  const modes = [
-    { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
-    { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
-  ];
+  // const modes = [
+  //   { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
+  //   { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
+  // ];
 
   const fetchAttributesFields = () => {
     coreRefs.dslService

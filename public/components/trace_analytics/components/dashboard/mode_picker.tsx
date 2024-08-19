@@ -4,16 +4,19 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { SAVED_TRACESOURCE, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { OSDSavedTraceSourceClient } from '../../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_trace_sources';
 import { ObservabilitySavedTraceSources } from '../../../../services/saved_objects/saved_object_client/types';
-import { TraceAnalyticsMode } from '../../home';
-import { CustomIndexFlyout } from '../common/custom_index_flyout';
+import { useToast } from '../../../common/toast';
+import { CustomSourceFlyout } from '../common/custom_source/custom_source_flyout';
 
 export function DataSourcePicker(props: {
   modes: {
@@ -23,11 +26,13 @@ export function DataSourcePicker(props: {
   selectedMode: TraceAnalyticsMode;
   setMode: (mode: TraceAnalyticsMode) => void;
 }) {
+  const { setToast } = useToast();
   const { modes, selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [savedTraceSources, setSavedTraceSources] = useState<Array<ObservabilitySavedTraceSources>>(
-    []
+  const [customSources, setcustomSources] = useState<Array<ObservabilitySavedTraceSources>>([]);
+  const [defaultSource, setDefaultSource] = useState<ObservabilitySavedTraceSources>(
+    {} as ObservabilitySavedTraceSources
   );
 
   let labels = new Map([
@@ -35,24 +40,29 @@ export function DataSourcePicker(props: {
     ['data_prepper', 'Data Prepper'],
   ]);
 
-  // const loadSavedTraceSources = () => {
-  //   OSDSavedTraceSourceClient.getInstance()
-  //     .getBulk()
-  //     .then((res) => {
-  //       setSavedTraceSources(res.observabilityObjectList);
-  //       res.observabilityObjectList.forEach((object) => {
-  //         labels.set();
-  //       });
-  //     });
-  // };
+  const loadSources = () => {
+    OSDSavedTraceSourceClient.getInstance()
+      .getBulk()
+      .then((res) => {
+        setcustomSources(res.observabilityObjectList);
+        res.observabilityObjectList.forEach((o) => {
+          if (SAVED_TRACESOURCE in o && o.traceSource.isDefault === true) {
+            setDefaultSource(o);
+          }
+        });
+      })
+      .catch((_error) => {
+        setToast('Failed to load custom sources', 'danger');
+      });
+  };
 
-  // useEffect(() => {
-  //   loadSavedTraceSources();
-  // }, [OSDSavedTraceSourceClient]);
+  useEffect(() => {
+    loadSources();
+  }, []);
 
   const trigger = {
-    label: labels.get(selectedMode),
-    title: selectedMode,
+    label: defaultSource?.traceSource?.name ?? labels.get(selectedMode),
+    title: defaultSource?.traceSource?.name ?? labels.get(selectedMode),
     'data-test-subj': 'indexPattern-switch-link',
     className: 'dscIndexPattern__triggerButton',
   };
@@ -98,6 +108,7 @@ export function DataSourcePicker(props: {
               value: x.id,
               checked: x.id === selectedMode ? 'on' : undefined,
               'data-test-subj': x.id + '-mode',
+              append: <EuiBadge>type</EuiBadge>,
             }))}
             onChange={(choices) => {
               const choice = (choices.find(({ checked }) => checked) as unknown) as {
@@ -127,13 +138,15 @@ export function DataSourcePicker(props: {
             }}
             size="s"
           >
-            Add custom trace source
+            Manage custom trace indices
           </EuiButton>
         </div>
       </EuiPopover>
-      <CustomIndexFlyout
+      <CustomSourceFlyout
         isFlyoutVisible={isFlyoutVisible}
         setIsFlyoutVisible={setIsFlyoutVisible}
+        loadSources={loadSources}
+        customSources={customSources}
       />
     </>
   );

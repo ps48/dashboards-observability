@@ -30,9 +30,8 @@ import {
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
-import { SpanField } from '../../../../../common/types/trace_analytics';
+import { SpanField, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
-import { TraceAnalyticsMode } from '../../home';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';

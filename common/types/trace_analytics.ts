@@ -4,7 +4,6 @@
  */
 
 import { SavedObjectAttributes } from '../../../../src/core/types';
-import { TraceAnalyticsMode } from '../../public/components/trace_analytics/home';
 
 export type SpanField =
   | 'SPAN_ID'
@@ -56,12 +55,15 @@ export interface GraphVisEdge {
   color: string;
 }
 
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
+
 export interface TraceSource extends SavedObjectAttributes {
   name: string;
   description: string;
   type: TraceAnalyticsMode;
   spanIndices: string;
   serviceIndices: string;
+  isDefault: boolean;
 }
 
 export const SAVED_TRACESOURCE = 'traceSource';

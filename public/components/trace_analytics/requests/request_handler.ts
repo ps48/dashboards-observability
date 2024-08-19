@@ -11,7 +11,7 @@ import {
   TRACE_ANALYTICS_DSL_ROUTE,
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
 } from '../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../home';
+import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
 
 export async function handleDslRequest(
   http: CoreStart['http'],

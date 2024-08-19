@@ -11,8 +11,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { TraceAnalyticsMode } from 'public/components/trace_analytics/home';
 import React from 'react';
+import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 
 const getFields = (
   mode: TraceAnalyticsMode,

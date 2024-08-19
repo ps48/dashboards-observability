@@ -11,9 +11,9 @@ import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
-import { TraceAnalyticsMode } from '../home';
 import {
   getPayloadQuery,
   getServiceBreakdownQuery,
