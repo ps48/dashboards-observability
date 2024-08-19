@@ -19,11 +19,6 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import {
-  TRACE_CUSTOM_SERVICE_INDEX_SETTING,
-  TRACE_CUSTOM_SPAN_INDEX_SETTING,
-} from '../../../common/constants/trace_analytics';
-import { uiSettingsService } from '../../../common/utils';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
@@ -162,20 +157,12 @@ export const Home = (props: HomeProps) => {
   }, [props.setActionMenu, props.savedObjectsMDSClient.client, props.notifications]);
 
   useEffect(() => {
-    if (
-      uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING) &&
-      uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING)
-    ) {
-      setDataPrepperIndicesExist(true);
-      setJaegerIndicesExist(true);
-    } else {
-      handleDataPrepperIndicesExistRequest(
-        props.http,
-        setDataPrepperIndicesExist,
-        dataSourceMDSId[0].id
-      );
-      handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
-    }
+    handleDataPrepperIndicesExistRequest(
+      props.http,
+      setDataPrepperIndicesExist,
+      dataSourceMDSId[0].id
+    );
+    handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
   }, [dataSourceMDSId]);
 
   const modes = [
