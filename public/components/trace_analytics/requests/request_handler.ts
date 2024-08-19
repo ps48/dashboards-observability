@@ -33,7 +33,7 @@ export async function handleDslRequest(
     body = { ...bodyQuery, index: getSpanIndices(mode) };
   }
   const query = {
-    dataSourceMDSId: dataSourceMDSId,
+    dataSourceMDSId,
   };
   if (setShowTimeoutToast) {
     const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
@@ -66,7 +66,7 @@ export async function handleJaegerIndicesExistRequest(
   dataSourceMDSId?: string
 ) {
   const query = {
-    dataSourceMDSId: dataSourceMDSId,
+    dataSourceMDSId,
   };
   http
     .post(TRACE_ANALYTICS_JAEGER_INDICES_ROUTE, {
@@ -82,7 +82,7 @@ export async function handleDataPrepperIndicesExistRequest(
   dataSourceMDSId?: string
 ) {
   const query = {
-    dataSourceMDSId: dataSourceMDSId,
+    dataSourceMDSId,
   };
   http
     .post(TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE, {

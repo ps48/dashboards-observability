@@ -5,7 +5,6 @@
 
 import { SavedObjectAttributes } from '../../../../src/core/types';
 import { SavedQuery, SavedVisualization } from './explorer';
-import { TraceSource } from './trace_analytics';
 
 export const VISUALIZATION_SAVED_OBJECT = 'observability-visualization';
 export const SEARCH_SAVED_OBJECT = 'observability-search';
@@ -33,12 +32,4 @@ export interface SearchSavedObjectAttributes extends SavedObjectAttributes {
   version: number;
   createdTimeMs: number;
   savedQuery: SavedQuery;
-}
-
-export interface TraceSourceSavedObjectAttributes extends SavedObjectAttributes {
-  title: string;
-  description: string;
-  version: number;
-  createdTimeMs: number;
-  traceSource: TraceSource;
 }
