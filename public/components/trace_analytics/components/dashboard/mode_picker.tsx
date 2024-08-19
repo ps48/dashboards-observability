@@ -15,10 +15,10 @@ import { TraceAnalyticsMode } from '../../home';
 import { CustomIndexFlyout } from '../common/custom_index_flyout';
 
 export function DataSourcePicker(props: {
-  modes: {
+  modes: Array<{
     id: string;
     title: string;
-  }[];
+  }>;
   selectedMode: TraceAnalyticsMode;
   setMode: (mode: TraceAnalyticsMode) => void;
 }) {
@@ -26,12 +26,11 @@ export function DataSourcePicker(props: {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-
-  let labels = new Map([
+  const labels = new Map([
     ['jaeger', 'Jaeger'],
     ['data_prepper', 'Data Prepper'],
+    ['ccs_data_prepper', 'CCS Data Prepper'],
   ]);
-
 
   const trigger = {
     label: labels.get(selectedMode),

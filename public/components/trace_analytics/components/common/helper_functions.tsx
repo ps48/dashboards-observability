@@ -431,13 +431,13 @@ export const filtersToDsl = (
       let filterQuery = {};
       let field = filter.field;
       if (field === 'latency') {
-        if (mode === 'data_prepper') {
+        if (mode === 'ccs_data_prepper' || mode === 'data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
           field = 'duration';
         }
       } else if (field === 'error') {
-        if (mode === 'data_prepper') {
+        if (mode === 'ccs_data_prepper' || mode === 'data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
           field = 'tag.error';
@@ -573,15 +573,25 @@ export const getAttributes = (jsonMapping: JsonMapping): string[] => {
 };
 
 export const getSpanIndices = (mode: TraceAnalyticsMode) => {
-  const customIndex = uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING);
-  if (customIndex) return customIndex;
-
-  return mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME;
+  switch (mode) {
+    case 'ccs_data_prepper':
+      return uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING);
+    case 'data_prepper':
+      return DATA_PREPPER_INDEX_NAME;
+    case 'jaeger':
+    default:
+      return JAEGER_INDEX_NAME;
+  }
 };
 
 export const getServiceIndices = (mode: TraceAnalyticsMode) => {
-  const customIndex = uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING);
-  if (customIndex) return customIndex;
-
-  return mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME;
+  switch (mode) {
+    case 'ccs_data_prepper':
+      return uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING);
+    case 'data_prepper':
+      return DATA_PREPPER_SERVICE_INDEX_NAME;
+    case 'jaeger':
+    default:
+      return JAEGER_SERVICE_INDEX_NAME;
+  }
 };

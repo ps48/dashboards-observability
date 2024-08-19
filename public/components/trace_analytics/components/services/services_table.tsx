@@ -101,16 +101,17 @@ export function ServicesTable(props: ServicesTableProps) {
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
-            {mode === 'data_prepper' && (
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
-                >
-                  {isServiceTrendEnabled ? 'Hide 24 hour trends' : 'Show 24 hour trends'}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+            {mode === 'ccs_data_prepper' ||
+              (mode === 'data_prepper' && (
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    size="xs"
+                    onClick={() => setIsServiceTrendEnabled(!isServiceTrendEnabled)}
+                  >
+                    {isServiceTrendEnabled ? 'Hide 24 hour trends' : 'Show 24 hour trends'}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ))}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -269,6 +270,7 @@ export function ServicesTable(props: ServicesTableProps) {
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
         {!(
+          mode === 'ccs_data_prepper' ||
           (mode === 'data_prepper' && dataPrepperIndicesExist) ||
           (mode === 'jaeger' && jaegerIndicesExist)
         ) ? (

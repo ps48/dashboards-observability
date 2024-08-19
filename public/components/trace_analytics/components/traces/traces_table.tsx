@@ -54,7 +54,7 @@ export function TracesTable(props: TracesTableProps) {
   };
 
   const columns = useMemo(() => {
-    if (mode === 'data_prepper') {
+    if (mode === 'ccs_data_prepper' || mode === 'data_prepper') {
       return [
         {
           field: 'trace_id',
@@ -262,6 +262,7 @@ export function TracesTable(props: TracesTableProps) {
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
         {!(
+          mode === 'ccs_data_prepper' ||
           (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
           (mode === 'jaeger' && props.jaegerIndicesExist)
         ) ? (

@@ -515,7 +515,7 @@ export const getJaegerErrorTrendQuery = () => {
 };
 
 export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buckets?: any[]) => {
-  if (mode === 'data_prepper') {
+  if (mode === 'ccs_data_prepper' || mode === 'data_prepper') {
     return {
       size: 0,
       query: {
@@ -620,7 +620,7 @@ export const getDashboardTraceGroupPercentiles = (mode: TraceAnalyticsMode, buck
 };
 
 export const getErrorRatePltQuery = (mode: TraceAnalyticsMode, fixedInterval) => {
-  if (mode === 'data_prepper') {
+  if (mode === 'ccs_data_prepper' || mode === 'data_prepper') {
     return {
       size: 0,
       query: {
@@ -805,7 +805,7 @@ export const getDashboardThroughputPltQuery = (mode: TraceAnalyticsMode, fixedIn
   };
 };
 
-export const getDashboardErrorTopGroupsQuery = (mode: TraceAnalyticsMode) => {
+export const getDashboardErrorTopGroupsQuery = (_mode: TraceAnalyticsMode) => {
   return {
     size: 0,
     query: {

@@ -61,7 +61,8 @@ export function TracesContent(props: TracesProps) {
   useEffect(() => {
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'ccs_data_prepper' ||
+        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh();
@@ -129,7 +130,11 @@ export function TracesContent(props: TracesProps) {
       <EuiPanel>
         <EuiAccordion
           id="accordion1"
-          buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
+          buttonContent={
+            mode === 'ccs_data_prepper' || mode === 'data_prepper'
+              ? 'Trace Groups'
+              : 'Service and Operations'
+          }
           forceState={trigger}
           onToggle={onToggle}
           data-test-subj="trace-groups-service-operation-accordian"

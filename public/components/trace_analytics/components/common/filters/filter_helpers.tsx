@@ -19,7 +19,7 @@ const getFields = (
   page: 'dashboard' | 'traces' | 'services' | 'app',
   attributesFilterFields: string[]
 ) =>
-  mode === 'data_prepper'
+  mode === 'ccs_data_prepper' || mode === 'data_prepper'
     ? {
         dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
         traces: [

@@ -53,7 +53,7 @@ export interface TraceAnalyticsCoreDeps {
 
 interface HomeProps extends RouteComponentProps, TraceAnalyticsCoreDeps {}
 
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'ccs_data_prepper';
 
 export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, SearchBarProps {
   mode: TraceAnalyticsMode;
@@ -181,11 +181,16 @@ export const Home = (props: HomeProps) => {
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
+    {
+      id: 'ccs_data_prepper',
+      title: 'CCS Data Prepper',
+      'data-test-subj': 'ccs-data-prepper-mode',
+    },
   ];
 
   const fetchAttributesFields = () => {
     coreRefs.dslService
-      ?.fetchFields(getSpanIndices('data_prepper'))
+      ?.fetchFields(getSpanIndices(mode))
       .then((res) => {
         const attributes = getAttributes(res);
         setAttributesFilterFields(attributes);
@@ -204,7 +209,7 @@ export const Home = (props: HomeProps) => {
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
   useEffect(() => {
-    if (mode === 'data_prepper') fetchAttributesFields();
+    if (mode === 'ccs_data_prepper' || mode === 'data_prepper') fetchAttributesFields();
   }, [mode]);
 
   const serviceBreadcrumbs = [

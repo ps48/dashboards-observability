@@ -97,7 +97,7 @@ export function TraceView(props: TraceViewProps) {
                   </EuiFlexGroup>
                 )}
               </EuiFlexItem>
-              {mode === 'data_prepper' ? (
+              {mode === 'ccs_data_prepper' || mode === 'data_prepper' ? (
                 <EuiFlexItem grow={false}>
                   <EuiText className="overview-title">Trace group name</EuiText>
                   <EuiText size="s" className="overview-content">
@@ -307,7 +307,7 @@ export function TraceView(props: TraceViewProps) {
             ) : null}
           </EuiPanel>
           <EuiSpacer />
-          {mode === 'data_prepper' ? (
+          {mode === 'ccs_data_prepper' || mode === 'data_prepper' ? (
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}

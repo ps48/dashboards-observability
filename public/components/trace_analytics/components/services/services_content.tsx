@@ -8,6 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import {
   handleServiceMapRequest,
   handleServicesRequest,
@@ -20,7 +21,6 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { ServicesProps } from './services';
 import { ServicesTable } from './services_table';
-import { coreRefs } from '../../../../framework/core_refs';
 
 export function ServicesContent(props: ServicesProps) {
   const {
@@ -85,7 +85,8 @@ export function ServicesContent(props: ServicesProps) {
     setFilteredService(newFilteredService);
     if (
       !redirect &&
-      ((mode === 'data_prepper' && dataPrepperIndicesExist) ||
+      (mode === 'ccs_data_prepper' ||
+        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh(newFilteredService);
@@ -209,7 +210,7 @@ export function ServicesContent(props: ServicesProps) {
         serviceTrends={serviceTrends}
       />
       <EuiSpacer size="m" />
-      {mode === 'data_prepper' && dataPrepperIndicesExist ? (
+      {mode === 'ccs_data_prepper' || (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
         <ServiceMap
           addFilter={addFilter}
           serviceMap={serviceMap}
