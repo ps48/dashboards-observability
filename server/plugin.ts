@@ -19,6 +19,7 @@ import { migrateV1IntegrationToV2Integration } from './adaptors/integrations/mig
 import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { PPLParsers } from './parsers/ppl_parser';
+import { registerObservabilityUISettings } from './plugin_helper/register_settings';
 import { setupRoutes } from './routes/index';
 import {
   notebookSavedObject,
@@ -230,7 +231,7 @@ export class ObservabilityPlugin
 
     assistantDashboards?.registerMessageParser(PPLParsers);
 
-    // registerObservabilityUISettings(core.uiSettings);
+    registerObservabilityUISettings(core.uiSettings);
     return {};
   }
 
