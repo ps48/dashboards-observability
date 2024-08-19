@@ -5,12 +5,11 @@
 
 import { CoreStart } from '../../../../../../src/core/public';
 import {
-  DATA_PREPPER_INDEX_NAME,
-  JAEGER_INDEX_NAME,
   TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE,
   TRACE_ANALYTICS_DSL_ROUTE,
   TRACE_ANALYTICS_JAEGER_INDICES_ROUTE,
 } from '../../../../common/constants/trace_analytics';
+import { getSpanIndices } from '../components/common/helper_functions';
 import { TraceAnalyticsMode } from '../home';
 
 export async function handleDslRequest(
@@ -31,7 +30,7 @@ export async function handleDslRequest(
   }
   let body = bodyQuery;
   if (!bodyQuery.index) {
-    body = { ...bodyQuery, index: mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME };
+    body = { ...bodyQuery, index: getSpanIndices(mode) };
   }
   const query = {
     dataSourceMDSId: dataSourceMDSId,

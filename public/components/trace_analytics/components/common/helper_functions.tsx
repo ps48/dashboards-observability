@@ -15,6 +15,8 @@ import {
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
   TRACE_ANALYTICS_DOCUMENTATION_LINK,
+  TRACE_CUSTOM_SERVICE_INDEX_SETTING,
+  TRACE_CUSTOM_SPAN_INDEX_SETTING,
 } from '../../../../../common/constants/trace_analytics';
 import { GraphVisEdge, GraphVisNode } from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
@@ -568,4 +570,18 @@ export const getAttributes = (jsonMapping: JsonMapping): string[] => {
     return [...spanAttributes, ...resourceAttributes];
   }
   return [];
+};
+
+export const getSpanIndices = (mode: TraceAnalyticsMode) => {
+  const customIndex = uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING);
+  if (customIndex) return customIndex;
+
+  return mode === 'jaeger' ? JAEGER_INDEX_NAME : DATA_PREPPER_INDEX_NAME;
+};
+
+export const getServiceIndices = (mode: TraceAnalyticsMode) => {
+  const customIndex = uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING);
+  if (customIndex) return customIndex;
+
+  return mode === 'jaeger' ? JAEGER_SERVICE_INDEX_NAME : DATA_PREPPER_SERVICE_INDEX_NAME;
 };

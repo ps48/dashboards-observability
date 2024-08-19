@@ -23,7 +23,6 @@ import {
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
 } from '../../../../../common/constants/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
-import { OSDSavedTraceSourceClient } from '../../../../services/saved_objects/saved_object_client/osd_saved_objects/saved_trace_sources';
 import { useToast } from '../../../common/toast';
 
 interface CustomIndexFlyoutProps {
@@ -56,20 +55,13 @@ export const CustomIndexFlyout = ({
   const onSaveIndices = async () => {
     try {
       setIsLoading(true);
-      // await uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, spanIndices);
-      // await uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, serviceIndices);
-      OSDSavedTraceSourceClient.getInstance().create({
-        name: 'saved-trace-dp',
-        description: '',
-        type: 'data_prepper',
-        spanIndices: 'dest1:otel-v1-apm-span-*,dest2:otel-v1-apm-span-*',
-        serviceIndices: 'dest1:otel-v1-apm-services-*,dest2:otel-v1-apm-services-*',
-      });
+      await uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, spanIndices);
+      await uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, serviceIndices);
       setIsLoading(false);
-      setToast('Updated trace analytics indices successfully', 'success');
+      setToast('Updated trace analytics sources successfully', 'success');
     } catch (error) {
       console.error(error);
-      setToast('Failed to update trace analytics indices', 'danger');
+      setToast('Failed to update trace analytics sources', 'danger');
     }
     setIsLoading(false);
   };

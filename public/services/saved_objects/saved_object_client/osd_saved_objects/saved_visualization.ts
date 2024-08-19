@@ -7,8 +7,8 @@ import { SavedObjectsFindOptions } from '../../../../../../../src/core/public';
 import { IField } from '../../../../../common/types/explorer';
 import {
   SAVED_OBJECT_VERSION,
-  VisualizationSavedObjectAttributes,
   VISUALIZATION_SAVED_OBJECT,
+  VisualizationSavedObjectAttributes,
 } from '../../../../../common/types/observability_saved_object_attributes';
 import { getOSDSavedObjectsClient } from '../../../../../common/utils';
 import {
@@ -20,7 +20,6 @@ import {
 } from '../types';
 import { OSDSavedObjectClient } from './osd_saved_object_client';
 import { OSDSavedObjectCreateResponse, OSDSavedObjectUpdateResponse } from './types';
-import { QueryManager } from '../../../../../common/query_manager/ppl_query_manager';
 
 interface CommonParams {
   query: string;

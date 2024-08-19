@@ -19,11 +19,10 @@ import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { DATA_PREPPER_INDEX_NAME } from '../../../common/constants/trace_analytics';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
-import { getAttributes } from './components/common/helper_functions';
+import { getAttributes, getSpanIndices } from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { ServiceFlyout } from './components/services/service_flyout';
@@ -173,7 +172,7 @@ export const Home = (props: HomeProps) => {
 
   const fetchAttributesFields = () => {
     coreRefs.dslService
-      ?.fetchFields(DATA_PREPPER_INDEX_NAME)
+      ?.fetchFields(getSpanIndices('data_prepper'))
       .then((res) => {
         const attributes = getAttributes(res);
         setAttributesFilterFields(attributes);

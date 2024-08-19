@@ -5,7 +5,6 @@
 
 import { SAVED_QUERY, SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
 import { SavedQuery, SavedVisualization } from '../../../../common/types/explorer';
-import { SAVED_TRACESOURCE, TraceSource } from '../../../../common/types/trace_analytics';
 
 export interface SavedObjectsCreateResponse {
   objectId: string;
@@ -28,14 +27,7 @@ export interface ObservabilitySavedQuery extends ObservabilitySavedObjectBase {
   [SAVED_QUERY]: SavedQuery;
 }
 
-export interface ObservabilitySavedTraceSources extends ObservabilitySavedObjectBase {
-  [SAVED_TRACESOURCE]: TraceSource;
-}
-
-export type ObservabilitySavedObject =
-  | ObservabilitySavedVisualization
-  | ObservabilitySavedQuery
-  | ObservabilitySavedTraceSources;
+export type ObservabilitySavedObject = ObservabilitySavedVisualization | ObservabilitySavedQuery;
 
 export interface SavedObjectsGetParams {
   objectId: string;

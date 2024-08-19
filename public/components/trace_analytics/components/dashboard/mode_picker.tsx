@@ -11,7 +11,6 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { ObservabilitySavedTraceSources } from '../../../../services/saved_objects/saved_object_client/types';
 import { TraceAnalyticsMode } from '../../home';
 import { CustomIndexFlyout } from '../common/custom_index_flyout';
 
@@ -26,29 +25,13 @@ export function DataSourcePicker(props: {
   const { modes, selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [savedTraceSources, setSavedTraceSources] = useState<Array<ObservabilitySavedTraceSources>>(
-    []
-  );
+
 
   let labels = new Map([
     ['jaeger', 'Jaeger'],
     ['data_prepper', 'Data Prepper'],
   ]);
 
-  // const loadSavedTraceSources = () => {
-  //   OSDSavedTraceSourceClient.getInstance()
-  //     .getBulk()
-  //     .then((res) => {
-  //       setSavedTraceSources(res.observabilityObjectList);
-  //       res.observabilityObjectList.forEach((object) => {
-  //         labels.set();
-  //       });
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   loadSavedTraceSources();
-  // }, [OSDSavedTraceSourceClient]);
 
   const trigger = {
     label: labels.get(selectedMode),
