@@ -108,7 +108,7 @@ export function ServiceView(props: ServiceViewProps) {
           props.parentBreadcrumb,
           {
             text: 'Trace analytics',
-            href: '#/services',
+            href: '#/traces',
           },
         ],
         [

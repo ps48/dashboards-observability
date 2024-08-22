@@ -127,6 +127,17 @@ export function TracesContent(props: TracesProps) {
         attributesFilterFields={attributesFilterFields}
       />
       <EuiSpacer size="m" />
+      <TracesTable
+        items={tableItems}
+        refresh={refresh}
+        mode={mode}
+        loading={loading}
+        getTraceViewUri={getTraceViewUri}
+        openTraceFlyout={openTraceFlyout}
+        jaegerIndicesExist={jaegerIndicesExist}
+        dataPrepperIndicesExist={dataPrepperIndicesExist}
+      />
+      <EuiSpacer size="m" />
       <EuiPanel>
         <EuiAccordion
           id="accordion1"
@@ -143,17 +154,6 @@ export function TracesContent(props: TracesProps) {
           {trigger === 'open' && dashboardContent()}
         </EuiAccordion>
       </EuiPanel>
-      <EuiSpacer size="m" />
-      <TracesTable
-        items={tableItems}
-        refresh={refresh}
-        mode={mode}
-        loading={loading}
-        getTraceViewUri={getTraceViewUri}
-        openTraceFlyout={openTraceFlyout}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-      />
     </>
   );
 }

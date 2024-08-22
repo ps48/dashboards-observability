@@ -119,7 +119,7 @@ export const Home = (props: HomeProps) => {
 
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
-  let defaultRoute = props.defaultRoute ?? '/services';
+  let defaultRoute = props.defaultRoute ?? '/traces';
   const currentHash = window.location.hash.split('#')[1] || '';
 
   if (currentHash.startsWith('/traces') || currentHash.startsWith('/services')) {
@@ -204,7 +204,7 @@ export const Home = (props: HomeProps) => {
       ? [
           {
             text: 'Trace analytics',
-            href: '#/services',
+            href: '#/traces',
           },
         ]
       : []),
@@ -219,7 +219,7 @@ export const Home = (props: HomeProps) => {
       ? [
           {
             text: 'Trace analytics',
-            href: '#/services',
+            href: '#/traces',
           },
         ]
       : []),
