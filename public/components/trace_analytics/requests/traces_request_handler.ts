@@ -4,7 +4,9 @@
  */
 
 import { PropertySort } from '@elastic/eui';
+import { isArray, isObject } from 'lodash';
 import get from 'lodash/get';
+import omitBy from 'lodash/omitBy';
 import round from 'lodash/round';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
@@ -21,9 +23,47 @@ import {
   getSpanFlyoutQuery,
   getSpansQuery,
   getTraceGroupPercentilesQuery,
+  getTracesLandingQuery,
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
+
+export const handleTracesLandingRequest = async (
+  http: HttpSetup,
+  DSL: any,
+  items: any,
+  setItems: (items: any) => void,
+  setColumns: (items: any) => void,
+  mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string,
+  sort?: PropertySort
+) => {
+  const responsePromise = handleDslRequest(
+    http,
+    DSL,
+    getTracesLandingQuery(mode, undefined, sort),
+    mode,
+    dataSourceMDSId
+  );
+
+  return Promise.allSettled([responsePromise])
+    .then(([responseResult]) => {
+      if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
+      let keys = new Set();
+      const response = responseResult.value.hits.hits.map((val) => {
+        const source = omitBy(val._source, isArray || isObject);
+        Object.keys(source).forEach((key) => keys.add(key));
+        return { ...source };
+      });
+
+      return [keys, response];
+    })
+    .then((newItems) => {
+      setColumns([...newItems[0]]);
+      setItems(newItems[1]);
+    })
+    .catch((error) => console.error(error));
+};
 
 export const handleTracesRequest = async (
   http: HttpSetup,

@@ -47,6 +47,82 @@ export const getTraceGroupPercentilesQuery = () => {
   return query;
 };
 
+export const getTracesLandingQuery = (
+  mode: TraceAnalyticsMode,
+  traceId: string = '',
+  sort?: PropertySort
+) => {
+  const field = sort?.field || 'startTime';
+  const direction = sort?.direction || 'desc';
+  const jaegerQuery: any = {
+    size: TRACES_MAX_NUM,
+    _source: {
+      includes: [
+        'traceId',
+        'traceGroup',
+        'durationInNanos',
+        'status.code',
+        'endTime',
+        '*attributes*',
+        '*instrumentation*',
+      ],
+    },
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [
+          {
+            nested: {
+              path: 'references', // Jaeger root span doesn't have any references for child span.
+              query: {
+                exists: {
+                  field: 'references.spanID',
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    sort: [{ [field]: { order: direction } }],
+    track_total_hits: false,
+  };
+  const dataPrepperQuery: any = {
+    size: TRACES_MAX_NUM,
+    query: {
+      bool: {
+        must: [],
+        filter: [
+          {
+            term: {
+              parentSpanId: '', // Data prepper root span doesn't have any parent.
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    },
+    sort: [{ [field]: { order: direction } }],
+    track_total_hits: false,
+  };
+  if (traceId) {
+    jaegerQuery.query.bool.filter.push({
+      term: {
+        traceID: traceId,
+      },
+    });
+    dataPrepperQuery.query.bool.filter.push({
+      term: {
+        traceId,
+      },
+    });
+  }
+  return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
+};
+
 export const getTracesQuery = (
   mode: TraceAnalyticsMode,
   traceId: string = '',

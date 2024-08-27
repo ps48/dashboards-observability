@@ -191,15 +191,15 @@ export function getServiceMapGraph(
       };
     } else {
       styleOptions = {
-        borderWidth: 1.5,
+        borderWidth: 1,
         chosen: false,
         color: {
           border: '#DADADC',
           background: '#FFFFFF',
         },
-        shapeProperties: {
-          borderDashes: [2, 2],
-        },
+        // shapeProperties: {
+        //   borderDashes: [2, 2],
+        // },
       };
     }
 
@@ -594,4 +594,8 @@ export const getServiceIndices = (mode: TraceAnalyticsMode) => {
     default:
       return JAEGER_SERVICE_INDEX_NAME;
   }
+};
+
+export const capitalizeFirstLetter = (text: string) => {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 };
