@@ -324,6 +324,7 @@ export const Home = (props: HomeProps) => {
                 <Traces
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
+                  setCurrentSelectedService={setCurrentSelectedService}
                   getTraceViewUri={getTraceViewUri}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
@@ -337,6 +338,7 @@ export const Home = (props: HomeProps) => {
                 <Traces
                   page="traces"
                   childBreadcrumbs={traceBreadcrumbs}
+                  setCurrentSelectedService={setCurrentSelectedService}
                   getTraceViewUri={getTraceViewUri}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}

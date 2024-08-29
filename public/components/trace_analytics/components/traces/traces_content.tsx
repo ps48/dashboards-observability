@@ -4,20 +4,28 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiAccordion, EuiPanel, EuiSpacer, PropertySort } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  PropertySort,
+} from '@elastic/eui';
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import { handleTracesLandingRequest } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
+import { FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
+import { ServicesList } from './services_list';
 import { TracesProps } from './traces';
 import { TracesLandingTable } from './traces_landing_table';
-
 export function TracesContent(props: TracesProps) {
   const {
     page,
@@ -39,6 +47,7 @@ export function TracesContent(props: TracesProps) {
     dataPrepperIndicesExist,
     jaegerIndicesExist,
     attributesFilterFields,
+    setCurrentSelectedService,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -49,7 +58,8 @@ export function TracesContent(props: TracesProps) {
   const [filteredService, setFilteredService] = useState('');
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
-  >('latency');
+  >('');
+  const [includeMetrics, setIncludeMetrics] = useState(false);
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
@@ -98,7 +108,30 @@ export function TracesContent(props: TracesProps) {
         (mode === 'jaeger' && jaegerIndicesExist))
     )
       refresh();
-  }, [filters, appConfigs, redirect, mode, jaegerIndicesExist, dataPrepperIndicesExist]);
+  }, [
+    filters,
+    appConfigs,
+    redirect,
+    mode,
+    jaegerIndicesExist,
+    dataPrepperIndicesExist,
+    includeMetrics,
+  ]);
+
+  const addFilter = (filter: FilterType) => {
+    for (let i = 0; i < filters.length; i++) {
+      const addedFilter = filters[i];
+      if (addedFilter.field === filter.field) {
+        if (addedFilter.operator === filter.operator && addedFilter.value === filter.value) return;
+        const newFilters = [...filters];
+        newFilters.splice(i, 1, filter);
+        setFilters(newFilters);
+        return;
+      }
+    }
+    const newFilters = [...filters, filter];
+    setFilters(newFilters);
+  };
 
   const refresh = async (sort?: PropertySort) => {
     setLoading(true);
@@ -135,7 +168,7 @@ export function TracesContent(props: TracesProps) {
       props.dataSourceMDSId[0].id,
       setServiceMap,
       filteredService,
-      false
+      includeMetrics
     ),
       setLoading(false);
   };
@@ -161,19 +194,10 @@ export function TracesContent(props: TracesProps) {
         mode={mode}
         attributesFilterFields={attributesFilterFields}
       />
+
       <EuiSpacer size="m" />
-      {/* <TracesTable
-        items={tableItems}
-        refresh={refresh}
-        mode={mode}
-        loading={loading}
-        getTraceViewUri={getTraceViewUri}
-        openTraceFlyout={openTraceFlyout}
-        jaegerIndicesExist={jaegerIndicesExist}
-        dataPrepperIndicesExist={dataPrepperIndicesExist}
-      /> */}
       <TracesLandingTable
-        columns={columns}
+        columnItems={columns}
         items={tableItems}
         refresh={refresh}
         mode={mode}
@@ -184,20 +208,37 @@ export function TracesContent(props: TracesProps) {
         dataPrepperIndicesExist={dataPrepperIndicesExist}
       />
       <EuiSpacer size="m" />
-
       {mode === 'ccs_data_prepper' || mode === 'data_prepper' ? (
-        <ServiceMap
-          addFilter={undefined}
-          serviceMap={serviceMap}
-          idSelected={serviceMapIdSelected}
-          setIdSelected={setServiceMapIdSelected}
-          page={page}
-          // setCurrentSelectedService={setCurrentSelectedService}
-        />
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={2}>
+              <ServicesList
+                addFilter={addFilter}
+                serviceMap={serviceMap}
+                filteredService={filteredService}
+                setFilteredService={setFilteredService}
+              />
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={8}>
+              <ServiceMap
+                addFilter={addFilter}
+                serviceMap={serviceMap}
+                idSelected={serviceMapIdSelected}
+                setIdSelected={setServiceMapIdSelected}
+                page={page}
+                currService={filteredService}
+                setCurrentSelectedService={setCurrentSelectedService}
+                includeMetricsCallback={() => {
+                  setIncludeMetrics(true);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : (
         <div />
       )}
-      <EuiSpacer size="m" />
       <EuiPanel>
         <EuiAccordion
           id="accordion1"

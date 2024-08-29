@@ -52,9 +52,75 @@ export const getTracesLandingQuery = (
   traceId: string = '',
   sort?: PropertySort
 ) => {
-  const field = sort?.field || 'startTime';
-  const direction = sort?.direction || 'desc';
   const jaegerQuery: any = {
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+    aggs: {
+      traces: {
+        terms: {
+          field: 'traceID',
+          size: TRACES_MAX_NUM,
+          order: {
+            [sort?.field || '_key']: sort?.direction || 'asc',
+          },
+          execution_hint: 'map',
+        },
+        aggs: {
+          latency: {
+            max: {
+              script: {
+                source: `
+                if (doc.containsKey('duration') && !doc['duration'].empty) {
+                  return Math.round(doc['duration'].value) / 1000.0
+                }
+
+                return 0
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+          trace_group: {
+            terms: {
+              field: 'traceGroup',
+              size: 1,
+            },
+          },
+          error_count: {
+            filter: {
+              term: {
+                'tag.error': true,
+              },
+            },
+          },
+          last_updated: {
+            max: {
+              script: {
+                source: `
+                if (doc.containsKey('startTime') && !doc['startTime'].empty && doc.containsKey('duration') && !doc['duration'].empty) {
+                  return (Math.round(doc['duration'].value) + Math.round(doc['startTime'].value)) / 1000.0
+                }
+
+                return 0
+                `,
+                lang: 'painless',
+              },
+            },
+          },
+        },
+      },
+    },
+    track_total_hits: false,
+  };
+
+  const dataPrepperQuery: any = {
     size: TRACES_MAX_NUM,
     _source: {
       includes: [
@@ -70,30 +136,6 @@ export const getTracesLandingQuery = (
     query: {
       bool: {
         must: [],
-        filter: [],
-        should: [],
-        must_not: [
-          {
-            nested: {
-              path: 'references', // Jaeger root span doesn't have any references for child span.
-              query: {
-                exists: {
-                  field: 'references.spanID',
-                },
-              },
-            },
-          },
-        ],
-      },
-    },
-    sort: [{ [field]: { order: direction } }],
-    track_total_hits: false,
-  };
-  const dataPrepperQuery: any = {
-    size: TRACES_MAX_NUM,
-    query: {
-      bool: {
-        must: [],
         filter: [
           {
             term: {
@@ -105,7 +147,7 @@ export const getTracesLandingQuery = (
         must_not: [],
       },
     },
-    sort: [{ [field]: { order: direction } }],
+    ...(sort && { sort: [{ [sort.field]: { order: sort.direction } }] }),
     track_total_hits: false,
   };
   if (traceId) {

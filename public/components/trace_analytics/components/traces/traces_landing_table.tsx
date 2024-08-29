@@ -2,28 +2,43 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiDataGrid,
-  EuiDataGridColumn,
-  EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingLogo,
+  EuiHorizontalRule,
+  EuiInMemoryTable,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTableFieldDataColumnType,
   EuiText,
+  EuiToolTip,
   PropertySort,
 } from '@elastic/eui';
-import { round } from 'lodash';
+import { CriteriaWithPagination } from '@opensearch-project/oui/src/eui_components/basic_table';
+import round from 'lodash/round';
+import truncate from 'lodash/truncate';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
+import React, { useMemo, useState } from 'react';
+import {
+  TRACE_ANALYTICS_DATE_FORMAT,
+  TRACES_MAX_NUM,
+} from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../home';
-import { microToMilliSec, nanoToMilliSec, PanelTitle } from '../common/helper_functions';
+import {
+  MissingConfigurationMessage,
+  nanoToMilliSec,
+  NoMatchMessage,
+  PanelTitle,
+} from '../common/helper_functions';
 
 interface TracesLandingTableProps {
-  columns: string[];
+  columnItems: string[];
   items: any[];
   refresh: (sort?: PropertySort) => Promise<void>;
   mode: TraceAnalyticsMode;
@@ -34,143 +49,285 @@ interface TracesLandingTableProps {
   dataPrepperIndicesExist: boolean;
 }
 
-export const TracesLandingTable = ({
-  columns,
-  items,
-  refresh,
-  mode,
-  loading,
-  getTraceViewUri,
-  openTraceFlyout,
-  jaegerIndicesExist,
-  dataPrepperIndicesExist,
-}: TracesLandingTableProps) => {
-  const [tableColumns, setTableColumns] = useState<Array<EuiDataGridColumn>>([]);
-  const [visibleColumns, setVisibleColumns] = useState<Array<string>>([]);
-  const [tableParams, setTableParams] = useState({
-    size: 10,
-    page: 0,
-    sortingColumns: [] as Array<{
-      id: string;
-      direction: 'asc' | 'desc';
-    }>,
-  });
+export function TracesLandingTable(props: TracesLandingTableProps) {
+  const { columnItems, items, refresh, mode, loading, getTraceViewUri, openTraceFlyout } = props;
+  const [showAttributes, setShowAttributes] = useState(false);
 
   const renderTitleBar = (totalItems?: number) => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={10}>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem grow={false}>
           <PanelTitle title="Traces" totalItems={totalItems} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={() => setShowAttributes(!showAttributes)}>
+            {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [items]);
+  const dynamicColumns = columnItems
+    .filter((col) => col.includes('attributes') || col.includes('instrumentation'))
+    .map((col) => ({
+      className: 'attributes-column',
+      field: col,
+      name: (
+        <EuiText className="euiTableCellContent">
+          <EuiToolTip content={col}>
+            <p className="euiTableCellContent__text attributes-column-header">{col}</p>
+          </EuiToolTip>
+        </EuiText>
+      ),
+      align: 'right',
+      sortable: true,
+      truncateText: true,
+      render: (item) =>
+        item ? (
+          <EuiText>
+            <EuiToolTip content={item}>
+              <EuiText size="s">
+                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
+              </EuiText>
+            </EuiToolTip>
+          </EuiText>
+        ) : (
+          '-'
+        ),
+    }));
 
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
-      if (!items.hasOwnProperty(adjustedRowIndex)) return '-';
-      const value = items[adjustedRowIndex][columnId];
-      if ((value == null || value === '') && columnId !== 'jaegerEndTime') return '-';
-      switch (columnId) {
-        case 'durationInNanos':
-          return `${round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
-        case 'duration':
-          return `${round(microToMilliSec(Math.max(0, value)), 2)} ms`;
-        case 'startTime':
-          return mode === 'jaeger'
-            ? moment(round(microToMilliSec(Math.max(0, value)), 2)).format(
-                TRACE_ANALYTICS_DATE_FORMAT
-              )
-            : moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
-        case 'jaegerEndTime':
-          return moment(
-            round(
-              microToMilliSec(
-                Math.max(0, items[adjustedRowIndex].startTime + items[adjustedRowIndex].duration)
-              ),
-              2
-            )
-          ).format(TRACE_ANALYTICS_DATE_FORMAT);
-        case 'endTime':
-          return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
-        case 'status.code':
-          return value === 2 ? (
-            <EuiText color="danger" size="s">
-              Yes
-            </EuiText>
-          ) : (
-            'No'
-          );
-        default:
-          return <EuiText>{value}</EuiText>;
-      }
+  const columns = useMemo(() => {
+    if (mode === 'ccs_data_prepper' || mode === 'data_prepper') {
+      return [
+        {
+          field: 'traceId',
+          name: 'Trace ID',
+          align: 'left',
+          sortable: true,
+          truncateText: false,
+          render: (item) => (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="trace-link"
+                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
+                >
+                  <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
+                    {item}
+                  </EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={item}>
+                  {(copy) => (
+                    <EuiButtonIcon
+                      aria-label="Copy trace id"
+                      iconType="copyClipboard"
+                      onClick={copy}
+                    >
+                      Click to copy
+                    </EuiButtonIcon>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        },
+        {
+          field: 'traceGroup',
+          name: 'Trace group',
+          align: 'left',
+          sortable: true,
+          truncateText: true,
+          className: 'trace-group-column',
+          render: (item) =>
+            item ? (
+              <EuiText size="s">
+                {item.length < 36 ? item : <div title={item}>{truncate(item, { length: 36 })}</div>}
+              </EuiText>
+            ) : (
+              '-'
+            ),
+        },
+        {
+          field: 'durationInNanos',
+          name: 'Duration (ms)',
+          align: 'right',
+          sortable: true,
+          truncateText: true,
+          render: (item) =>
+            item ? <EuiText size="s">{round(nanoToMilliSec(Math.max(0, item)), 2)}</EuiText> : '-',
+        },
+        {
+          field: 'status.code',
+          name: 'Errors',
+          align: 'right',
+          sortable: true,
+          render: (item) =>
+            item == null ? (
+              '-'
+            ) : +item === 2 ? (
+              <EuiText color="danger" size="s">
+                Yes
+              </EuiText>
+            ) : (
+              'No'
+            ),
+        },
+        {
+          field: 'endTime',
+          name: 'Last updated',
+          align: 'right',
+          sortable: true,
+          className: 'trace-group-column',
+          render: (item) =>
+            item === 0 || item ? moment(item).format(TRACE_ANALYTICS_DATE_FORMAT) : '-',
+        },
+        ...(showAttributes ? dynamicColumns : []),
+      ] as Array<EuiTableFieldDataColumnType<any>>;
+    } else {
+      return [
+        {
+          field: 'trace_id',
+          name: 'Trace ID',
+          align: 'left',
+          sortable: true,
+          truncateText: true,
+          render: (item) => (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="trace-link"
+                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
+                >
+                  <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
+                    {item}
+                  </EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={item}>
+                  {(copy) => (
+                    <EuiButtonIcon
+                      aria-label="Copy trace id"
+                      iconType="copyClipboard"
+                      onClick={copy}
+                    >
+                      Click to copy
+                    </EuiButtonIcon>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        },
+        {
+          field: 'latency',
+          name: 'Latency (ms)',
+          align: 'right',
+          sortable: true,
+          truncateText: true,
+        },
+        {
+          field: 'error_count',
+          name: 'Errors',
+          align: 'right',
+          sortable: true,
+          render: (item) =>
+            item == null ? (
+              '-'
+            ) : item > 0 ? (
+              <EuiText color="danger" size="s">
+                Yes
+              </EuiText>
+            ) : (
+              'No'
+            ),
+        },
+        {
+          field: 'last_updated',
+          name: 'Last updated',
+          align: 'left',
+          sortable: true,
+          render: (item) => (item === 0 || item ? item : '-'),
+        },
+      ] as Array<EuiTableFieldDataColumnType<any>>;
+    }
+  }, [showAttributes, items]);
+
+  const titleBar = useMemo(() => renderTitleBar(items?.length), [showAttributes, items]);
+
+  const [sorting, setSorting] = useState<{ sort: PropertySort }>({
+    sort: {
+      field: 'trace_id',
+      direction: 'asc',
+    },
+  });
+
+  const onTableChange = async ({ sort }: CriteriaWithPagination<unknown>) => {
+    if (typeof sort?.field !== 'string') return;
+
+    // maps table column key to DSL aggregation name
+    const fieldMappings = {
+      trace_id: '_key',
+      trace_group: null,
+      latency: 'latency',
+      percentile_in_trace_group: null,
+      error_count: 'error_count',
+      last_updated: 'last_updated',
     };
-  }, [items, tableParams.page, tableParams.size]);
+    const field = fieldMappings[sort.field as keyof typeof fieldMappings];
+    if (!field || items?.length < TRACES_MAX_NUM) {
+      setSorting({ sort });
+      return;
+    }
 
-  const onChangeItemsPerPage = useCallback((size) => setTableParams({ ...tableParams, size }), [
-    tableParams,
-    setTableParams,
-  ]);
-  const onChangePage = useCallback((page) => setTableParams({ ...tableParams, page }), [
-    tableParams,
-    setTableParams,
-  ]);
+    // using await when sorting the default sorted field leads to a bug in UI,
+    // user needs to click one time more to change sort back to ascending
+    if (sort.field === 'trace_id') {
+      refresh({ ...sort, field });
+      setSorting({ sort });
+      return;
+    }
 
-  useEffect(() => {
-    setTableColumns(columns.map((col) => ({ id: col, displayAsText: col })));
-    setVisibleColumns(
-      columns.filter(
-        (col) =>
-          !col.includes('attributes') &&
-          !col.includes('dropped') &&
-          !col.includes('traceGroupFields') &&
-          !col.includes('traceState') &&
-          !col.includes('parentSpanId') &&
-          !col.includes('spanId')
-      )
-    );
-  }, [columns]);
+    await refresh({ ...sort, field });
+    setSorting({ sort });
+  };
 
   return (
     <>
-      <EuiPanel grow={false}>
+      <EuiPanel>
         {titleBar}
         <EuiSpacer size="m" />
-        {!loading && items.length > 0 ? (
-          <EuiDataGrid
-            height="460px"
-            aria-label="Traces Data grid"
-            columns={tableColumns}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            rowCount={items.length}
-            renderCellValue={renderCellValue}
-            inMemory={{ level: 'sorting' }}
-            //   sorting={{ columns: sortingColumns, onSort }}
+        <EuiHorizontalRule margin="none" />
+        {!(
+          mode === 'ccs_data_prepper' ||
+          (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
+          (mode === 'jaeger' && props.jaegerIndicesExist)
+        ) ? (
+          <MissingConfigurationMessage mode={mode} />
+        ) : items?.length > 0 || loading ? (
+          <EuiInMemoryTable
+            className="traces-scrollable-table"
+            tableLayout="auto"
+            allowNeutralSort={true}
+            items={items}
+            columns={columns}
             pagination={{
-              pageIndex: tableParams.page,
-              pageSize: tableParams.size,
-              pageSizeOptions: [10, 50, 100],
-              onChangeItemsPerPage,
-              onChangePage,
+              initialPageSize: 10,
+              pageSizeOptions: [5, 10, 15],
             }}
-            toolbarVisibility={{
-              showColumnSelector: true,
-              showFullScreenSelector: false,
-              showStyleSelector: false,
-            }}
-            //   onColumnResize={onColumnResize.current}
-            //   onFullScreenChange={onFullScreenChange.current}
+            sorting={sorting}
+            onTableChange={onTableChange}
+            loading={loading}
           />
         ) : (
-          <EuiEmptyPrompt
-            icon={<EuiLoadingLogo logo="apmApp" size="xl" />}
-            title={<h3>Loading Traces</h3>}
-          />
+          <NoMatchMessage size="xl" />
         )}
       </EuiPanel>
     </>
   );
-};
+}

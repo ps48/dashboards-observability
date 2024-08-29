@@ -73,7 +73,7 @@ export const CustomIndexFlyout = ({
       <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h3 id="flyoutTitle">Add custom trace source</h3>
+            <h3 id="flyoutTitle">Manage CCS trace source</h3>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

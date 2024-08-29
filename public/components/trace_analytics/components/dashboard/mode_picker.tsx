@@ -109,7 +109,7 @@ export function DataSourcePicker(props: {
             }}
             size="s"
           >
-            Add custom trace source
+            Manage CCS trace source
           </EuiButton>
         </div>
       </EuiPopover>

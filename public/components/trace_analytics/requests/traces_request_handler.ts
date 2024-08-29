@@ -49,14 +49,30 @@ export const handleTracesLandingRequest = async (
   return Promise.allSettled([responsePromise])
     .then(([responseResult]) => {
       if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
-      let keys = new Set();
-      const response = responseResult.value.hits.hits.map((val) => {
-        const source = omitBy(val._source, isArray || isObject);
-        Object.keys(source).forEach((key) => keys.add(key));
-        return { ...source };
-      });
 
-      return [keys, response];
+      if (mode === 'data_prepper' || mode === 'ccs_data_prepper') {
+        let keys = new Set();
+        const response = responseResult.value.hits.hits.map((val) => {
+          const source = omitBy(val._source, isArray || isObject);
+          Object.keys(source).forEach((key) => keys.add(key));
+          return { ...source };
+        });
+
+        return [keys, response];
+      } else {
+        return [
+          [undefined],
+          responseResult.value.aggregations.traces.buckets.map((bucket: any) => {
+            return {
+              trace_id: bucket.key,
+              latency: bucket.latency.value,
+              last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+              error_count: bucket.error_count.doc_count,
+              actions: '#',
+            };
+          }),
+        ];
+      }
     })
     .then((newItems) => {
       setColumns([...newItems[0]]);
