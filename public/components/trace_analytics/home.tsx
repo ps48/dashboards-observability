@@ -152,6 +152,7 @@ export const Home = (props: HomeProps) => {
     const dataConnectionLabel = e[0] ? e[0].label : undefined;
 
     if (dataConnectionId !== dataSourceMDSId[0].id) {
+      console.log('dataConnectionLabel: ', dataConnectionLabel);
       setDataSourceMDSId([{ id: dataConnectionId, label: dataConnectionLabel }]);
 
       const currentUrl = window.location.href.split('?')[0];

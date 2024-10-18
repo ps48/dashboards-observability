@@ -28,6 +28,11 @@ import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
@@ -68,6 +73,8 @@ export function ServiceView(props: ServiceViewProps) {
   >('latency');
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
+
+  const isNewNavEnabled = coreRefs?.chrome?.navGroup?.getNavGroupEnabled();
 
   const refresh = () => {
     const DSL = filtersToDsl(
@@ -172,17 +179,28 @@ export function ServiceView(props: ServiceViewProps) {
                 name: 'View logs',
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
-                  coreRefs?.application!.navigateToApp('data-explorer', {
-                    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
-                      props.startTime
-                    },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
-                      props.dataSourceMDSId[0].id ?? ''
-                    }',title:'',type:DATA_SOURCE),id:'${
-                      props.dataSourceMDSId[0].id
-                    }::ss4o_logs-*',timeFieldName:'%40timestamp',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20serviceName%20%3D%20${
-                      props.serviceName
-                    }'))`,
-                  });
+                  isNewNavEnabled
+                    ? coreRefs?.application!.navigateToApp('data-explorer', {
+                        path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+                          props.startTime
+                        },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+                          props.dataSourceMDSId[0].id ?? ''
+                        }',title:'${props.dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
+                          props.dataSourceMDSId[0].id ?? ''
+                        }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-%2A%20%7C%20where%20serviceName%20%3D%20%22${
+                          props.serviceName
+                        }%22'))`,
+                      })
+                    : coreRefs?.application!.navigateToApp(observabilityLogsID, {
+                        path: `#/explorer`,
+                        state: {
+                          DEFAULT_DATA_SOURCE_NAME,
+                          DEFAULT_DATA_SOURCE_TYPE,
+                          queryToRun: `source = ss4o_logs-* | where serviceName='${props.serviceName}'`,
+                          startTimeRange: props.startTime,
+                          endTimeRange: props.endTime,
+                        },
+                      });
                 },
               },
             ]
