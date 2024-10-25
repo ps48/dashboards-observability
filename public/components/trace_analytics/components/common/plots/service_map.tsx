@@ -5,6 +5,7 @@
 
 import {
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -74,6 +75,7 @@ export function ServiceMap({
   filterByCurrService?: boolean;
   includeMetricsCallback?: () => void;
 }) {
+  const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
   const [invalid, setInvalid] = useState(false);
   const [network, setNetwork] = useState(null);
   const [ticks, setTicks] = useState<number[]>([]);
@@ -271,7 +273,7 @@ export function ServiceMap({
             <EuiHorizontalRule margin="m" />
           </>
         )}
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup>
           <EuiFlexItem grow={7}>
             <EuiCompressedFieldSearch
               prepend="Focus on"
@@ -280,6 +282,13 @@ export function ServiceMap({
               onChange={(e) => setQuery(e.target.value)}
               onSearch={(service) => onFocus(service)}
               isInvalid={query.length > 0 && invalid}
+              append={
+                <EuiButtonIcon
+                  iconType="refresh"
+                  size="s"
+                  onClick={() => setGraphKey((prevKey) => prevKey + 1)}
+                />
+              }
             />
           </EuiFlexItem>
           {page === 'traces' && (
@@ -302,6 +311,7 @@ export function ServiceMap({
               <div style={{ position: 'relative' }}>
                 {items?.graph && (
                   <Graph
+                    key={graphKey}
                     graph={items.graph}
                     options={options}
                     events={events}
