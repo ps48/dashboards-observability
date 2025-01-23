@@ -23,6 +23,7 @@ interface ServicesListProps {
   setFilteredService: React.Dispatch<React.SetStateAction<string>>;
   filters: FilterType[];
   setFilters: (filters: FilterType[]) => void;
+  isLoading: boolean;
 }
 
 export const ServicesList = ({
@@ -32,6 +33,7 @@ export const ServicesList = ({
   setFilteredService,
   filters = [],
   setFilters,
+  isLoading,
 }: ServicesListProps) => {
   const [options, setOptions] = useState<Array<{ label: string; checked?: 'on' | undefined }>>([]);
 
@@ -101,6 +103,8 @@ export const ServicesList = ({
           searchable
           options={options}
           listProps={{ bordered: true }}
+          isLoading={isLoading}
+          loadingMessage="Loading services"
           onChange={(newOptions) => {
             const selectedOption = newOptions.find((option) => option.checked === 'on');
 

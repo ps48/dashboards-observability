@@ -47,6 +47,7 @@ interface TracesLandingTableProps {
   dataPrepperIndicesExist: boolean;
   tracesTableMode: TraceQueryMode;
   setTracesTableMode: React.Dispatch<React.SetStateAction<TraceQueryMode>>;
+  loadMoreItems: () => void;
 }
 
 export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
@@ -123,9 +124,16 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
         </EuiFlexItem>
         {props.tracesTableMode !== 'traces' && (
           <EuiFlexItem grow={false}>
-            <EuiSmallButtonEmpty onClick={() => setShowAttributes(!showAttributes)}>
-              {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
-            </EuiSmallButtonEmpty>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonEmpty onClick={() => setShowAttributes(!showAttributes)}>
+                  {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
+                </EuiSmallButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonEmpty onClick={props.loadMoreItems}>Load more</EuiSmallButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

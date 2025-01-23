@@ -163,6 +163,7 @@ export function TraceView(props: TraceViewProps) {
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
   >('latency');
+  const [isServicesDataloading, setIsServicesDataloading] = useState(false);
 
   const refresh = async () => {
     const DSL = filtersToDsl(
@@ -197,7 +198,14 @@ export function TraceView(props: TraceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     );
-    handleServiceMapRequest(props.http, DSL, mode, props.dataSourceMDSId[0].id, setServiceMap);
+    handleServiceMapRequest(
+      props.http,
+      DSL,
+      mode,
+      setIsServicesDataloading,
+      props.dataSourceMDSId[0].id,
+      setServiceMap
+    );
   };
 
   useEffect(() => {
@@ -300,6 +308,7 @@ export function TraceView(props: TraceViewProps) {
           <EuiSpacer />
           {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
             <ServiceMap
+              isServicesDataloading={isServicesDataloading}
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}
               idSelected={serviceMapIdSelected}

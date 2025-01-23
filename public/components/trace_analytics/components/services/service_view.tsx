@@ -77,6 +77,7 @@ export function ServiceView(props: ServiceViewProps) {
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
   const [serviceId, setServiceId] = useState<string | null>(null);
+  const [isServicesDataloading, setIsServicesDataloading] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -112,6 +113,7 @@ export function ServiceView(props: ServiceViewProps) {
         props.http,
         DSL,
         mode,
+        setIsServicesDataloading,
         props.dataSourceMDSId[0].id,
         setServiceMap,
         props.serviceName
@@ -546,6 +548,7 @@ export function ServiceView(props: ServiceViewProps) {
             serviceMap={serviceMap}
             idSelected={serviceMapIdSelected}
             setIdSelected={setServiceMapIdSelected}
+            isServicesDataloading={isServicesDataloading}
             currService={props.serviceName}
             page="serviceView"
             filterByCurrService={true}

@@ -60,6 +60,7 @@ export function ServicesContent(props: ServicesProps) {
   const [isServiceTrendEnabled, setIsServiceTrendEnabled] = useState(false);
   const [serviceTrends, setServiceTrends] = useState<ServiceTrends>({});
   const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
+  const [isServicesDataloading, setIsServicesDataloading] = useState(false);
 
   useEffect(() => {
     const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
@@ -139,6 +140,7 @@ export function ServicesContent(props: ServicesProps) {
         http,
         serviceMapDSL,
         mode,
+        setIsServicesDataloading,
         dataSourceMDSId[0].id,
         setServiceMap,
         currService || filteredService
@@ -240,6 +242,7 @@ export function ServicesContent(props: ServicesProps) {
           {mode === 'custom_data_prepper' ||
           (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
             <ServiceMap
+              isServicesDataloading={isServicesDataloading}
               addFilter={addFilter}
               filters={filters}
               setFilters={setFilters}

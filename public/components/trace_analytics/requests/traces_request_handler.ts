@@ -14,6 +14,7 @@ import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../public/framework/core_refs';
 import {
   getTimestampPrecision,
   microToMilliSec,
@@ -31,7 +32,6 @@ import {
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
-import { coreRefs } from '../../../../public/framework/core_refs';
 
 export const handleCustomIndicesTracesRequest = async (
   http: HttpSetup,
@@ -40,15 +40,18 @@ export const handleCustomIndicesTracesRequest = async (
   setItems: (items: any) => void,
   setColumns: (items: any) => void,
   mode: TraceAnalyticsMode,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   dataSourceMDSId?: string,
   sort?: PropertySort,
   queryMode?: TraceQueryMode,
-  isUnderOneHour?: boolean
+  isUnderOneHour?: boolean,
+  numOfItems?: number
 ) => {
+  setIsLoading(true);
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour),
+    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour, numOfItems),
     mode,
     dataSourceMDSId
   );
@@ -91,7 +94,8 @@ export const handleCustomIndicesTracesRequest = async (
         title: 'Failed to retrieve custom indices traces',
         toastLifeTimeMs: 10000,
       });
-    });
+    })
+    .finally(() => setIsLoading(false));
 };
 
 export const handleTracesRequest = async (
@@ -101,6 +105,7 @@ export const handleTracesRequest = async (
   items: any,
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   dataSourceMDSId?: string,
   sort?: PropertySort,
   isUnderOneHour?: boolean
@@ -118,6 +123,7 @@ export const handleTracesRequest = async (
     return Math.max(0, Math.min(100, low));
   };
 
+  setIsLoading(true);
   const responsePromise = handleDslRequest(
     http,
     DSL,
@@ -186,7 +192,8 @@ export const handleTracesRequest = async (
         title: 'Failed to retrieve traces',
         toastLifeTimeMs: 10000,
       });
-    });
+    })
+    .finally(() => setIsLoading(false));
 };
 
 export const handleTraceViewRequest = (

@@ -474,7 +474,8 @@ export const getCustomIndicesTracesQuery = (
   traceId: string = '',
   sort?: PropertySort,
   queryMode?: TraceQueryMode,
-  isUnderOneHour?: boolean
+  isUnderOneHour?: boolean,
+  numOfItems?: number
 ) => {
   const jaegerQuery: any = {
     size: 0,
@@ -490,7 +491,7 @@ export const getCustomIndicesTracesQuery = (
       traces: {
         terms: {
           field: 'traceID',
-          size: TRACES_MAX_NUM,
+          size: numOfItems,
           order: {
             [sort?.field || '_key']: sort?.direction || 'asc',
           },
@@ -545,7 +546,8 @@ export const getCustomIndicesTracesQuery = (
   };
 
   const dataPrepperQuery: any = {
-    size: TRACES_MAX_NUM,
+    from: 0,
+    size: numOfItems,
     _source: {
       includes: [
         'spanId',
@@ -568,7 +570,7 @@ export const getCustomIndicesTracesQuery = (
       },
     },
     ...(sort && { sort: [{ [sort.field]: { order: sort.direction } }] }),
-    track_total_hits: false,
+    track_total_hits: true,
   };
 
   if (queryMode === 'root_spans') {

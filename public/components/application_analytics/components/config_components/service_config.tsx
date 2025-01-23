@@ -49,7 +49,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
   useEffect(() => {
-    handleServiceMapRequest(http, dslService, mode, '', setServiceMap);
+    handleServiceMapRequest(http, dslService, mode, () => {}, '', setServiceMap);
   }, []);
 
   useEffect(() => {

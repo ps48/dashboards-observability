@@ -55,6 +55,7 @@ export function ServiceMap({
   idSelected,
   setIdSelected,
   addFilter,
+  isServicesDataloading,
   currService,
   page,
   setCurrentSelectedService,
@@ -68,6 +69,7 @@ export function ServiceMap({
   serviceMap: ServiceObject;
   idSelected: 'latency' | 'error_rate' | 'throughput';
   setIdSelected: (newId: 'latency' | 'error_rate' | 'throughput') => void;
+  isServicesDataloading: boolean;
   addFilter?: (filter: FilterType) => void;
   currService?: string;
   page:
@@ -530,7 +532,7 @@ export function ServiceMap({
                     }}
                   />
                 )}
-                {isLoading && (
+                {(isLoading || isServicesDataloading) && (
                   <div
                     style={{
                       position: 'absolute',
