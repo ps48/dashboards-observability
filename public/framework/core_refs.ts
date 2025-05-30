@@ -14,11 +14,12 @@ import {
   SavedObjectsClientContract,
   WorkspacesStart,
 } from '../../../../src/core/public';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { DataSourcePluginStart } from '../../../../src/plugins/data_source/public';
-import PPLService from '../services/requests/ppl';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 import { ContentManagementPluginStart } from '../../../../src/plugins/content_management/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { DataSourcePluginStart } from '../../../../src/plugins/data_source/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import PPLService from '../services/requests/ppl';
 
 class CoreRefs {
   private static _instance: CoreRefs;
@@ -40,6 +41,7 @@ class CoreRefs {
   public navigation?: NavigationPublicPluginStart;
   public contentManagement?: ContentManagementPluginStart;
   public workspaces?: WorkspacesStart;
+  public data?: DataPublicPluginStart;
   private constructor() {
     // ...
   }

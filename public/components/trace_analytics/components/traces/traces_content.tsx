@@ -29,6 +29,7 @@ import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
 import { DataSourcePicker } from '../dashboard/mode_picker';
+import { SamplePPLComponent } from './sample_ppl_component';
 import { ServicesList } from './services_list';
 import { TracesProps } from './traces';
 import { TracesCustomIndicesTable } from './traces_custom_indices_table';
@@ -549,6 +550,7 @@ export function TracesContent(props: TracesProps) {
               {trigger === 'open' && dashboardContent()}
             </EuiAccordion>
           </EuiPanel>
+          <SamplePPLComponent />
         </EuiPageBody>
       </EuiPage>
     </>
