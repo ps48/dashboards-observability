@@ -96,6 +96,7 @@ export const App = ({
             notifications={notifications}
             CoreStartProp={CoreStartProp}
             DepsStart={DepsStart}
+            embeddable={DepsStart.embeddable}
             DashboardContainerByValueRenderer={
               DepsStart.dashboard.DashboardContainerByValueRenderer
             }

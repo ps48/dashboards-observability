@@ -1,0 +1,146 @@
+{
+  "operationMetrics": {
+    "default": [
+      {
+        "Error": null,
+        "Id": "LatencyP99",
+        "Stat": "p99",
+        "Unit": "Milliseconds",
+        "Value": 50.0
+      },
+      {
+        "Error": null,
+        "Id": "LatencyP90",
+        "Stat": "p90",
+        "Unit": "Milliseconds",
+        "Value": 30.0
+      },
+      {
+        "Error": null,
+        "Id": "LatencyP50",
+        "Stat": "p50",
+        "Unit": "Milliseconds",
+        "Value": 15.0
+      },
+      {
+        "Error": null,
+        "Id": "Volume",
+        "Stat": "SampleCount",
+        "Unit": "None",
+        "Value": 1000
+      },
+      {
+        "Error": null,
+        "Id": "Error",
+        "Stat": "Sum",
+        "Unit": "None",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "Fault",
+        "Stat": "Sum",
+        "Unit": "None",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "ErrorRate",
+        "Stat": "None",
+        "Unit": "Percent",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "FaultRate",
+        "Stat": "None",
+        "Unit": "Percent",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "Availability",
+        "Stat": "None",
+        "Unit": "Percent",
+        "Value": 100
+      }
+    ],
+    "variations": {
+      "high_latency": {
+        "LatencyP99": 500,
+        "LatencyP90": 300,
+        "LatencyP50": 150
+      },
+      "with_errors": {
+        "Error": 50,
+        "ErrorRate": 5,
+        "Availability": 95
+      },
+      "with_faults": {
+        "Fault": 100,
+        "FaultRate": 10,
+        "Availability": 90
+      }
+    }
+  },
+  "dependencyMetrics": {
+    "default": [
+      {
+        "Error": null,
+        "Id": "LatencyP99",
+        "Stat": "p99",
+        "Unit": "Milliseconds",
+        "Value": 25.0
+      },
+      {
+        "Error": null,
+        "Id": "LatencyP90",
+        "Stat": "p90",
+        "Unit": "Milliseconds",
+        "Value": 15.0
+      },
+      {
+        "Error": null,
+        "Id": "LatencyP50",
+        "Stat": "p50",
+        "Unit": "Milliseconds",
+        "Value": 8.0
+      },
+      {
+        "Error": null,
+        "Id": "Volume",
+        "Stat": "SampleCount",
+        "Unit": "None",
+        "Value": 500
+      },
+      {
+        "Error": null,
+        "Id": "Error",
+        "Stat": "Sum",
+        "Unit": "None",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "Fault",
+        "Stat": "Sum",
+        "Unit": "None",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "ErrorRate",
+        "Stat": "None",
+        "Unit": "Percent",
+        "Value": 0
+      },
+      {
+        "Error": null,
+        "Id": "FaultRate",
+        "Stat": "None",
+        "Unit": "Percent",
+        "Value": 0
+      }
+    ]
+  }
+}

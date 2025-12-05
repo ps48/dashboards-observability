@@ -1,0 +1,30 @@
+{
+  "EndTime": 1741726801,
+  "Service": {
+    "AttributeMaps": [
+      {
+        "EKS.Cluster": "petclinic-sampleApp",
+        "K8s.Namespace": "default",
+        "K8s.Workload": "pet-clinic-frontend",
+        "PlatformType": "AWS::EKS"
+      },
+      {
+        "AWS.Application": "PetClinic_Application",
+        "AWS.Application.ARN": "arn:aws:servicecatalog:us-east-1:511404824078:/applications/0c5n27i7cp9mln0znm4hcmwf6k"
+      }
+    ],
+    "KeyAttributes": {
+      "Environment": "eks:petclinic-sampleApp/default",
+      "Name": "pet-clinic-frontend",
+      "Type": "Service"
+    },
+    "LogGroupReferences": [
+      {
+        "Identifier": "/aws/containerinsights/petclinic-sampleApp/application",
+        "ResourceType": "AWS::Logs::LogGroup",
+        "Type": "AWS::Resource"
+      }
+    ]
+  },
+  "StartTime": 1741712400
+}

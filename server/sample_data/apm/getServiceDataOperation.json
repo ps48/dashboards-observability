@@ -1,0 +1,471 @@
+{
+  "NextToken": null,
+  "ServiceData": [
+    {
+      "Attributes": {
+        "DependencyCount": "0",
+        "OperationName": "GET /scripts"
+      },
+      "Data": [
+        {
+          "Error": null,
+          "Id": "LatencyP99",
+          "Stat": "p99",
+          "Unit": "Milliseconds",
+          "Value": 1.23
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP90",
+          "Stat": "p90",
+          "Unit": "Milliseconds",
+          "Value": 0.79
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP50",
+          "Stat": "p50",
+          "Unit": "Milliseconds",
+          "Value": 0.57
+        },
+        {
+          "Error": null,
+          "Id": "Volume",
+          "Stat": "SampleCount",
+          "Unit": "None",
+          "Value": 20500
+        },
+        {
+          "Error": null,
+          "Id": "Error",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Fault",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "ErrorRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "FaultRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Availability",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 100
+        }
+      ],
+      "SliError": null,
+      "SliReport": null
+    },
+    {
+      "Attributes": {
+        "DependencyCount": "1",
+        "OperationName": "POST /api/visit/owners/{ownerId}/pets/{petId}/visits"
+      },
+      "Data": [
+        {
+          "Error": null,
+          "Id": "LatencyP99",
+          "Stat": "p99",
+          "Unit": "Milliseconds",
+          "Value": 1164.92
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP90",
+          "Stat": "p90",
+          "Unit": "Milliseconds",
+          "Value": 607.47
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP50",
+          "Stat": "p50",
+          "Unit": "Milliseconds",
+          "Value": 44.79
+        },
+        {
+          "Error": null,
+          "Id": "Volume",
+          "Stat": "SampleCount",
+          "Unit": "None",
+          "Value": 12307
+        },
+        {
+          "Error": null,
+          "Id": "Error",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Fault",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 4627
+        },
+        {
+          "Error": null,
+          "Id": "ErrorRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "FaultRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 37.6
+        },
+        {
+          "Error": null,
+          "Id": "Availability",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 62.4
+        }
+      ],
+      "SliError": null,
+      "SliReport": null
+    },
+    {
+      "Attributes": {
+        "DependencyCount": "2",
+        "OperationName": "GET /api/gateway/owners/{ownerId}"
+      },
+      "Data": [
+        {
+          "Error": null,
+          "Id": "LatencyP99",
+          "Stat": "p99",
+          "Unit": "Milliseconds",
+          "Value": 51.15
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP90",
+          "Stat": "p90",
+          "Unit": "Milliseconds",
+          "Value": 18.98
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP50",
+          "Stat": "p50",
+          "Unit": "Milliseconds",
+          "Value": 5.14
+        },
+        {
+          "Error": null,
+          "Id": "Volume",
+          "Stat": "SampleCount",
+          "Unit": "None",
+          "Value": 9045
+        },
+        {
+          "Error": null,
+          "Id": "Error",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 616
+        },
+        {
+          "Error": null,
+          "Id": "Fault",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "ErrorRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 6.81
+        },
+        {
+          "Error": null,
+          "Id": "FaultRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Availability",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 100
+        }
+      ],
+      "SliError": null,
+      "SliReport": null
+    },
+    {
+      "Attributes": {
+        "DependencyCount": "0",
+        "OperationName": "GET /webjars/**"
+      },
+      "Data": [
+        {
+          "Error": null,
+          "Id": "LatencyP99",
+          "Stat": "p99",
+          "Unit": "Milliseconds",
+          "Value": 20.41
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP90",
+          "Stat": "p90",
+          "Unit": "Milliseconds",
+          "Value": 13.18
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP50",
+          "Stat": "p50",
+          "Unit": "Milliseconds",
+          "Value": 6.52
+        },
+        {
+          "Error": null,
+          "Id": "Volume",
+          "Stat": "SampleCount",
+          "Unit": "None",
+          "Value": 4995
+        },
+        {
+          "Error": null,
+          "Id": "Error",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Fault",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "ErrorRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "FaultRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Availability",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 100
+        }
+      ],
+      "SliError": null,
+      "SliReport": null
+    },
+    {
+      "Attributes": {
+        "DependencyCount": "1",
+        "OperationName": "POST /api/customer/owners"
+      },
+      "Data": [
+        {
+          "Error": null,
+          "Id": "LatencyP99",
+          "Stat": "p99",
+          "Unit": "Milliseconds",
+          "Value": 20.65
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP90",
+          "Stat": "p90",
+          "Unit": "Milliseconds",
+          "Value": 8.3
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP50",
+          "Stat": "p50",
+          "Unit": "Milliseconds",
+          "Value": 3.5
+        },
+        {
+          "Error": null,
+          "Id": "Volume",
+          "Stat": "SampleCount",
+          "Unit": "None",
+          "Value": 2706
+        },
+        {
+          "Error": null,
+          "Id": "Error",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Fault",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "ErrorRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "FaultRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Availability",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 100
+        }
+      ],
+      "SliError": null,
+      "SliReport": null
+    },
+    {
+      "Attributes": {
+        "DependencyCount": "1",
+        "OperationName": "POST /api/customer/owners/{ownerId}/pets"
+      },
+      "Data": [
+        {
+          "Error": null,
+          "Id": "LatencyP99",
+          "Stat": "p99",
+          "Unit": "Milliseconds",
+          "Value": 167.51
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP90",
+          "Stat": "p90",
+          "Unit": "Milliseconds",
+          "Value": 98.63
+        },
+        {
+          "Error": null,
+          "Id": "LatencyP50",
+          "Stat": "p50",
+          "Unit": "Milliseconds",
+          "Value": 42.14
+        },
+        {
+          "Error": null,
+          "Id": "Volume",
+          "Stat": "SampleCount",
+          "Unit": "None",
+          "Value": 181
+        },
+        {
+          "Error": null,
+          "Id": "Error",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "Fault",
+          "Stat": "Sum",
+          "Unit": "None",
+          "Value": 108
+        },
+        {
+          "Error": null,
+          "Id": "ErrorRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 0
+        },
+        {
+          "Error": null,
+          "Id": "FaultRate",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 59.67
+        },
+        {
+          "Error": null,
+          "Id": "Availability",
+          "Stat": "None",
+          "Unit": "Percent",
+          "Value": 40.33
+        }
+      ],
+      "SliError": null,
+      "SliReport": {
+        "BreachedSloCount": 1,
+        "BreachedSloNames": [
+          "test-standard-metric-period-based-exclusion-window-yy"
+        ],
+        "EndTime": 1741726451.181,
+        "OkSloCount": 0,
+        "ReferenceId": {
+          "ServiceOperationId": {
+            "KeyAttributes": {
+              "Environment": "eks:petclinic-sampleApp/default",
+              "Name": "pet-clinic-frontend",
+              "Type": "Service"
+            },
+            "OperationName": "POST /api/customer/owners/{ownerId}/pets"
+          }
+        },
+        "SliStatus": "BREACHED",
+        "StartTime": 1741715651.181,
+        "TotalSloCount": 1
+      }
+    }
+  ],
+  "ServiceDataSummary": {
+    "HealthyServiceDatumCount": 0,
+    "InsufficientDataServiceDatumCount": 0,
+    "NoSliServiceDatumCount": 23,
+    "SliErrorServiceDatumCount": 0,
+    "UnhealthyServiceDatumCount": 1
+  },
+  "TotalCount": 24
+}

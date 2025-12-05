@@ -1,0 +1,46 @@
+{
+    "Operations": [
+        {
+            "Name": "POST /api/cart"
+        },
+        {
+            "Name": "POST"
+        },
+        {
+            "Name": "GET /"
+        },
+        {
+            "Name": "GET"
+        },
+        {
+            "Name": "GET /api/cart"
+        },
+        {
+            "Name": "GET /api/products/{productId}"
+        },
+        {
+            "Name": "POST /api/checkout"
+        },
+        {
+            "Name": "GET /api/product-reviews/[productId]/index"
+        },
+        {
+            "Name": "GET /api/recommendations"
+        },
+        {
+            "Name": "GET /api/data"
+        },
+        {
+            "Name": "POST /api/product-ask-ai-assistant/[productId]/index"
+        },
+        {
+            "Name": "GET /api/shipping"
+        },
+        {
+            "Name": "GET /api/currency"
+        }
+    ],
+    "StartTime": 1763684166,
+    "EndTime": 1763684166,
+    "NextToken": null
+}

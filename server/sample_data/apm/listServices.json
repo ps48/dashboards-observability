@@ -1,0 +1,199 @@
+{
+    "EndTime": 1764090863,
+    "NextToken": null,
+    "ServiceSummaries": [
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "load-generator",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "frontend-proxy",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "frontend",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "cart",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "checkout",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "currency",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "product-catalog",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "recommendation",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "email",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "payment",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "shipping",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "flagd",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "quote",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "product-reviews",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "ad",
+                "Type": "Service"
+            }
+        },
+        {
+            "AttributeMaps": [
+                {
+                    "PlatformType": "Generic"
+                }
+            ],
+            "KeyAttributes": {
+                "Environment": "generic:default",
+                "Name": "fraud-detection",
+                "Type": "Service"
+            }
+        }
+    ],
+    "StartTime": 1764090863
+}

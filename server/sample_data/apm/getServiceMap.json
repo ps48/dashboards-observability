@@ -1,0 +1,449 @@
+{
+  "Nodes": [
+    {
+      "NodeId": "service/name=frontend-proxy|environment=generic%3Adefault",
+      "Name": "frontend-proxy",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "frontend-proxy",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {
+        "telemetry.sdk.language": "cpp"
+      },
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=frontend|environment=generic%3Adefault",
+      "Name": "frontend",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "frontend",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=load-generator|environment=generic%3Adefault",
+      "Name": "load-generator",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "load-generator",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {
+        "telemetry.sdk.language": "python"
+      },
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=product-catalog|environment=generic%3Adefault",
+      "Name": "product-catalog",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "product-catalog",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=recommendation|environment=generic%3Adefault",
+      "Name": "recommendation",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "recommendation",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {
+        "telemetry.sdk.language": "python"
+      },
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=flagd|environment=generic%3Adefault",
+      "Name": "flagd",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "flagd",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=ad|environment=generic%3Adefault",
+      "Name": "ad",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "ad",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=cart|environment=generic%3Adefault",
+      "Name": "cart",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "cart",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=checkout|environment=generic%3Adefault",
+      "Name": "checkout",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "checkout",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {
+        "telemetry.sdk.language": "go"
+      },
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=shipping|environment=generic%3Adefault",
+      "Name": "shipping",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "shipping",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=product-reviews|environment=generic%3Adefault",
+      "Name": "product-reviews",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "product-reviews",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=email|environment=generic%3Adefault",
+      "Name": "email",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "email",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=quote|environment=generic%3Adefault",
+      "Name": "quote",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "quote",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=payment|environment=generic%3Adefault",
+      "Name": "payment",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "payment",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=currency|environment=generic%3Adefault",
+      "Name": "currency",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "currency",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {},
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    },
+    {
+      "NodeId": "service/name=fraud-detection|environment=generic%3Adefault",
+      "Name": "fraud-detection",
+      "Type": "AWS::CloudWatch::Service",
+      "KeyAttributes": {
+        "Environment": "generic:default",
+        "Name": "fraud-detection",
+        "Type": "Service"
+      },
+      "AttributeMaps": [
+        {
+          "PlatformType": "Generic"
+        }
+      ],
+      "GroupByAttributes": {
+        "telemetry.sdk.language": "java"
+      },
+      "StatisticReferences": {},
+      "AggregatedNodeId": null
+    }
+  ],
+  "Edges": [
+    {
+      "EdgeId": "edge-0-frontend-proxy-frontend",
+      "SourceNodeId": "service/name=frontend-proxy|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-1-load-generator-frontend-proxy",
+      "SourceNodeId": "service/name=load-generator|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=frontend-proxy|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-2-frontend-product-catalog",
+      "SourceNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=product-catalog|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-3-recommendation-product-catalog",
+      "SourceNodeId": "service/name=recommendation|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=product-catalog|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-4-load-generator-flagd",
+      "SourceNodeId": "service/name=load-generator|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=flagd|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-5-frontend-recommendation",
+      "SourceNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=recommendation|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-6-frontend-ad",
+      "SourceNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=ad|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-7-frontend-cart",
+      "SourceNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=cart|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-8-checkout-product-catalog",
+      "SourceNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=product-catalog|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-9-checkout-shipping",
+      "SourceNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=shipping|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-10-frontend-product-reviews",
+      "SourceNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=product-reviews|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-11-checkout-email",
+      "SourceNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=email|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-12-checkout-cart",
+      "SourceNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=cart|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-13-shipping-quote",
+      "SourceNodeId": "service/name=shipping|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=quote|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-14-checkout-payment",
+      "SourceNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=payment|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-15-checkout-currency",
+      "SourceNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=currency|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-16-cart-flagd",
+      "SourceNodeId": "service/name=cart|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=flagd|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-17-frontend-checkout",
+      "SourceNodeId": "service/name=frontend|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=checkout|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-18-product-reviews-flagd",
+      "SourceNodeId": "service/name=product-reviews|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=flagd|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-19-fraud-detection-flagd",
+      "SourceNodeId": "service/name=fraud-detection|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=flagd|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-20-recommendation-flagd",
+      "SourceNodeId": "service/name=recommendation|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=flagd|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    },
+    {
+      "EdgeId": "edge-21-ad-flagd",
+      "SourceNodeId": "service/name=ad|environment=generic%3Adefault",
+      "DestinationNodeId": "service/name=flagd|environment=generic%3Adefault",
+      "StatisticReferences": {}
+    }
+  ],
+  "AggregatedNodes": [],
+  "AvailableGroupByAttributes": {
+    "telemetry.sdk.language": [
+      "cpp",
+      "go",
+      "java",
+      "python"
+    ]
+  },
+  "StartTime": 1764108144,
+  "EndTime": 1764108144,
+  "NextToken": null,
+  "AwsAccountId": null
+}

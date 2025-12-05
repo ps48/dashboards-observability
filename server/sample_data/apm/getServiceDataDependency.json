@@ -1,0 +1,383 @@
+{
+  "NextToken": null,
+  "ServiceData": [
+      {
+          "Attributes": {
+              "DependencyName": "customers-service-java",
+              "RemoteOperationName": "GET /diagnose",
+              "TargetCount": "0"
+          },
+          "Data": [
+              {
+                  "Error": null,
+                  "Id": "LatencyP99",
+                  "Stat": "p99",
+                  "Unit": "Milliseconds",
+                  "Value": 28218.99
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP90",
+                  "Stat": "p90",
+                  "Unit": "Milliseconds",
+                  "Value": 19054.77
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP50",
+                  "Stat": "p50",
+                  "Unit": "Milliseconds",
+                  "Value": 3298.97
+              },
+              {
+                  "Error": null,
+                  "Id": "Volume",
+                  "Stat": "SampleCount",
+                  "Unit": "None",
+                  "Value": 248
+              },
+              {
+                  "Error": null,
+                  "Id": "Error",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "Fault",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 246
+              },
+              {
+                  "Error": null,
+                  "Id": "ErrorRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "FaultRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 99.19
+              },
+              {
+                  "Error": null,
+                  "Id": "Availability",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0.81
+              }
+          ],
+          "SliError": null,
+          "SliReport": null
+      },
+      {
+          "Attributes": {
+              "DependencyName": "customers-service-java",
+              "RemoteOperationName": "GET /owners",
+              "TargetCount": "0"
+          },
+          "Data": [
+              {
+                  "Error": null,
+                  "Id": "LatencyP99",
+                  "Stat": "p99",
+                  "Unit": "Milliseconds",
+                  "Value": 48.59
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP90",
+                  "Stat": "p90",
+                  "Unit": "Milliseconds",
+                  "Value": 15.29
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP50",
+                  "Stat": "p50",
+                  "Unit": "Milliseconds",
+                  "Value": 3.86
+              },
+              {
+                  "Error": null,
+                  "Id": "Volume",
+                  "Stat": "SampleCount",
+                  "Unit": "None",
+                  "Value": 8385
+              },
+              {
+                  "Error": null,
+                  "Id": "Error",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 564
+              },
+              {
+                  "Error": null,
+                  "Id": "Fault",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "ErrorRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 6.73
+              },
+              {
+                  "Error": null,
+                  "Id": "FaultRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "Availability",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 100
+              }
+          ],
+          "SliError": null,
+          "SliReport": null
+      },
+      {
+          "Attributes": {
+              "DependencyName": "discovery-server:8761",
+              "RemoteOperationName": "PUT /eureka",
+              "TargetCount": "0"
+          },
+          "Data": [
+              {
+                  "Error": null,
+                  "Id": "LatencyP99",
+                  "Stat": "p99",
+                  "Unit": "Milliseconds",
+                  "Value": 4.71
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP90",
+                  "Stat": "p90",
+                  "Unit": "Milliseconds",
+                  "Value": 2.32
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP50",
+                  "Stat": "p50",
+                  "Unit": "Milliseconds",
+                  "Value": 1.97
+              },
+              {
+                  "Error": null,
+                  "Id": "Volume",
+                  "Stat": "SampleCount",
+                  "Unit": "None",
+                  "Value": 722
+              },
+              {
+                  "Error": null,
+                  "Id": "Error",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "Fault",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "ErrorRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "FaultRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "Availability",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 100
+              }
+          ],
+          "SliError": null,
+          "SliReport": null
+      },
+      {
+          "Attributes": {
+              "DependencyName": "payment-service-dotnet",
+              "RemoteOperationName": "GET /owners",
+              "TargetCount": "0"
+          },
+          "Data": [
+              {
+                  "Error": null,
+                  "Id": "LatencyP99",
+                  "Stat": "p99",
+                  "Unit": "Milliseconds",
+                  "Value": 106.73
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP90",
+                  "Stat": "p90",
+                  "Unit": "Milliseconds",
+                  "Value": 11.77
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP50",
+                  "Stat": "p50",
+                  "Unit": "Milliseconds",
+                  "Value": 5.65
+              },
+              {
+                  "Error": null,
+                  "Id": "Volume",
+                  "Stat": "SampleCount",
+                  "Unit": "None",
+                  "Value": 84
+              },
+              {
+                  "Error": null,
+                  "Id": "Error",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 84
+              },
+              {
+                  "Error": null,
+                  "Id": "Fault",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "ErrorRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 100
+              },
+              {
+                  "Error": null,
+                  "Id": "FaultRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "Availability",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 100
+              }
+          ],
+          "SliError": null,
+          "SliReport": null
+      },
+      {
+          "Attributes": {
+              "DependencyName": "payment-service-dotnet",
+              "RemoteOperationName": "POST /owners",
+              "TargetCount": "0"
+          },
+          "Data": [
+              {
+                  "Error": null,
+                  "Id": "LatencyP99",
+                  "Stat": "p99",
+                  "Unit": "Milliseconds",
+                  "Value": 25.79
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP90",
+                  "Stat": "p90",
+                  "Unit": "Milliseconds",
+                  "Value": 12.9
+              },
+              {
+                  "Error": null,
+                  "Id": "LatencyP50",
+                  "Stat": "p50",
+                  "Unit": "Milliseconds",
+                  "Value": 6.81
+              },
+              {
+                  "Error": null,
+                  "Id": "Volume",
+                  "Stat": "SampleCount",
+                  "Unit": "None",
+                  "Value": 85
+              },
+              {
+                  "Error": null,
+                  "Id": "Error",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 85
+              },
+              {
+                  "Error": null,
+                  "Id": "Fault",
+                  "Stat": "Sum",
+                  "Unit": "None",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "ErrorRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 100
+              },
+              {
+                  "Error": null,
+                  "Id": "FaultRate",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 0
+              },
+              {
+                  "Error": null,
+                  "Id": "Availability",
+                  "Stat": "None",
+                  "Unit": "Percent",
+                  "Value": 100
+              }
+          ],
+          "SliError": null,
+          "SliReport": null
+      }
+  ],
+  "ServiceDataSummary": {
+      "HealthyServiceDatumCount": 3,
+      "InsufficientDataServiceDatumCount": 1,
+      "NoSliServiceDatumCount": 1,
+      "SliErrorServiceDatumCount": 0,
+      "UnhealthyServiceDatumCount": 0
+  },
+  "TotalCount": 5
+}

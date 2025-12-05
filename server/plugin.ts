@@ -30,6 +30,8 @@ import {
   notebookSavedObject,
 } from './saved_objects/observability_saved_object';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import { registerApmResourcesRoute } from './routes/apm_resources';
+import { PPLFacet } from './services/facets/ppl_facet';
 
 export interface ObservabilityPluginSetupDependencies {
   dataSourceManagement: ReturnType<DataSourceManagementPlugin['setup']>;
@@ -226,6 +228,23 @@ export class ObservabilityPlugin
       dataSourceEnabled,
       logger: this.logger,
     });
+
+    // Register APM routes (only if MDS enabled)
+    // Note: We defer client instantiation to route handlers to avoid blocking plugin setup
+    if (dataSourceEnabled) {
+      this.logger.info('[APM] Registering APM routes - MDS is enabled');
+
+      // Create PPL facet for APM client
+      const pplFacet = new PPLFacet(openSearchObservabilityClient);
+
+      // Register unified APM resources route
+      // Pass the PPL facet for authentication
+      registerApmResourcesRoute(router, this.logger, core, pplFacet);
+
+      this.logger.info('[APM] APM routes registered successfully');
+    } else {
+      this.logger.info('[APM] Skipping APM initialization - MDS is not enabled');
+    }
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));

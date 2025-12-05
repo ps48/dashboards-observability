@@ -1,0 +1,163 @@
+[
+  {
+    "hashCode": "ABC123DEF",
+    "timestamp": 1731994815000,
+    "eventType": "ServiceConnections",
+    "service": {
+      "AttributeMaps": [
+        { "service.version": "1.2.3" },
+        { "deployment.environment": "production" },
+        { "telemetry.sdk.name": "opentelemetry" },
+        { "telemetry.sdk.language": "java" },
+        { "k8s.namespace.name": "default" }
+      ],
+      "GroupByAttributes": {
+        "appName": "Petclinic",
+        "BusinessUnit": "Frontend"
+      },
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "pet-clinic-frontend-java",
+        "Type": "Service"
+      }
+    },
+    "dependencyService": {
+      "AttributeMaps": [
+        { "service.version": "2.0.1" },
+        { "telemetry.sdk.language": "java" },
+        { "k8s.deployment.name": "backend-deployment" }
+      ],
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "pet-clinic-backend-java",
+        "Type": "Service"
+      }
+    }
+  },
+  {
+    "hashCode": "DEF456GHI",
+    "timestamp": 1731994816000,
+    "eventType": "ServiceConnections",
+    "service": {
+      "AttributeMaps": [
+        { "service.version": "2.0.1" },
+        { "db.system": "postgresql" },
+        { "telemetry.sdk.name": "opentelemetry" }
+      ],
+      "GroupByAttributes": {
+        "appName": "Petclinic",
+        "BusinessUnit": "Backend"
+      },
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "pet-clinic-backend-java",
+        "Type": "Service"
+      }
+    },
+    "dependencyService": {
+      "AttributeMaps": [
+        { "db.system": "postgresql" },
+        { "db.name": "petclinic_db" }
+      ],
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "pet-clinic-database",
+        "Type": "Database"
+      }
+    }
+  },
+  {
+    "hashCode": "GHI789JKL",
+    "timestamp": 1731994817000,
+    "eventType": "ServiceConnections",
+    "service": {
+      "AttributeMaps": [
+        { "service.version": "2.0.1" },
+        { "http.method": "POST" },
+        { "http.status_code": "200" }
+      ],
+      "GroupByAttributes": {
+        "appName": "Petclinic",
+        "BusinessUnit": "Backend"
+      },
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "pet-clinic-backend-java",
+        "Type": "Service"
+      }
+    },
+    "dependencyService": {
+      "AttributeMaps": [
+        { "service.version": "1.5.0" },
+        { "telemetry.sdk.language": "python" }
+      ],
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "payment-service",
+        "Type": "Service"
+      }
+    }
+  },
+  {
+    "hashCode": "JKL012MNO",
+    "timestamp": 1731994818000,
+    "eventType": "ServiceConnections",
+    "service": {
+      "AttributeMaps": [
+        { "service.version": "1.5.0" },
+        { "telemetry.sdk.language": "python" }
+      ],
+      "GroupByAttributes": {
+        "appName": "PaymentApp",
+        "BusinessUnit": "Payment"
+      },
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "payment-service",
+        "Type": "Service"
+      }
+    },
+    "dependencyService": {
+      "AttributeMaps": [
+        { "service.version": "1.0.0" },
+        { "telemetry.sdk.language": "nodejs" }
+      ],
+      "keyAttributes": {
+        "environment": "eks:demo/default",
+        "name": "notification-service",
+        "Type": "Service"
+      }
+    }
+  },
+  {
+    "hashCode": "MNO345PQR",
+    "timestamp": 1731994819000,
+    "eventType": "ServiceConnections",
+    "service": {
+      "AttributeMaps": [
+        { "service.version": "3.1.0" },
+        { "telemetry.sdk.language": "go" }
+      ],
+      "GroupByAttributes": {
+        "appName": "UserManagement",
+        "BusinessUnit": "Backend"
+      },
+      "keyAttributes": {
+        "environment": "eks:production/default",
+        "name": "user-service",
+        "Type": "Service"
+      }
+    },
+    "dependencyService": {
+      "AttributeMaps": [
+        { "service.version": "2.5.0" },
+        { "telemetry.sdk.language": "java" }
+      ],
+      "keyAttributes": {
+        "environment": "eks:production/default",
+        "name": "authentication-service",
+        "Type": "Service"
+      }
+    }
+  }
+]

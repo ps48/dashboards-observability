@@ -1,0 +1,47 @@
+{
+    "Dependencies": [
+        {
+            "DependencyName": "cart",
+            "RemoteOperationName": "cart",
+            "CallCount": 6
+        },
+        {
+            "DependencyName": "product-catalog",
+            "RemoteOperationName": "product-catalog",
+            "CallCount": 6
+        },
+        {
+            "DependencyName": "checkout",
+            "RemoteOperationName": "checkout",
+            "CallCount": 2
+        },
+        {
+            "DependencyName": "product-reviews",
+            "RemoteOperationName": "product-reviews",
+            "CallCount": 4
+        },
+        {
+            "DependencyName": "recommendation",
+            "RemoteOperationName": "recommendation",
+            "CallCount": 2
+        },
+        {
+            "DependencyName": "ad",
+            "RemoteOperationName": "ad",
+            "CallCount": 2
+        },
+        {
+            "DependencyName": "currency",
+            "RemoteOperationName": "currency",
+            "CallCount": 4
+        },
+        {
+            "DependencyName": "shipping",
+            "RemoteOperationName": "shipping",
+            "CallCount": 2
+        }
+    ],
+    "StartTime": 1763684280,
+    "EndTime": 1763684280,
+    "NextToken": null
+}
