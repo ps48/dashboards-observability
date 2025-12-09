@@ -15,6 +15,7 @@ import {
   WorkspacesStart,
 } from '../../../../src/core/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { DataSourcePluginStart } from '../../../../src/plugins/data_source/public';
 import PPLService from '../services/requests/ppl';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
@@ -36,6 +37,7 @@ class CoreRefs {
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   public overlays?: OverlayStart;
+  public data?: DataPublicPluginStart;
   public dataSource?: DataSourcePluginStart;
   public navigation?: NavigationPublicPluginStart;
   public contentManagement?: ContentManagementPluginStart;
