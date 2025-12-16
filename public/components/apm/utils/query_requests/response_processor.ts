@@ -361,9 +361,37 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
   const serviceMap = new Map<string, any>();
 
   rows.forEach((row, index) => {
-    const serviceName = row.serviceName;
-    const environmentType = row.EnvironmentType;
-    const platformType = row.PlatformType || 'Generic';
+    // Handle nested structure from new query format
+    // Parse JSON strings if needed
+    let serviceKeyAttributes = row['service.keyAttributes'];
+    if (typeof serviceKeyAttributes === 'string') {
+      try {
+        serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
+      } catch (e) {
+        console.error(
+          '[DEBUG] transformListServicesResponse: Failed to parse service.keyAttributes:',
+          e
+        );
+      }
+    }
+
+    let serviceGroupByAttributes = row['service.groupByAttributes'];
+    if (typeof serviceGroupByAttributes === 'string') {
+      try {
+        serviceGroupByAttributes = JSON.parse(serviceGroupByAttributes);
+      } catch (e) {
+        console.error(
+          '[DEBUG] transformListServicesResponse: Failed to parse service.groupByAttributes:',
+          e
+        );
+      }
+    }
+
+    const serviceName = serviceKeyAttributes?.name;
+    const environmentType = serviceKeyAttributes?.environment;
+    const platformType = environmentType
+      ? getPlatformTypeFromEnvironment(environmentType)
+      : 'Generic';
 
     console.log(
       `[DEBUG] Row ${index}: serviceName=${serviceName}, EnvironmentType=${environmentType}, PlatformType=${platformType}`
@@ -388,6 +416,7 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
           Name: serviceName,
           Type: 'Service',
         },
+        GroupByAttributes: serviceGroupByAttributes || {},
       });
       console.log(`[DEBUG] Added service to map: ${key}`);
     } else {
@@ -402,8 +431,16 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
     a.KeyAttributes.Name.localeCompare(b.KeyAttributes.Name)
   );
 
+  // Build aggregated groupByAttributes map
+  const allGroupByAttributes = ServiceSummaries.map((s) => s.GroupByAttributes).filter(Boolean);
+  const availableGroupByAttributes = buildAvailableGroupByAttributes(allGroupByAttributes);
+
   console.log(
     `[DEBUG] transformListServicesResponse: Final ServiceSummaries count = ${ServiceSummaries.length}`
+  );
+  console.log(
+    `[DEBUG] transformListServicesResponse: Available groupByAttributes:`,
+    availableGroupByAttributes
   );
   if (ServiceSummaries.length > 0) {
     console.log(
@@ -417,6 +454,7 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
     EndTime,
     NextToken: null,
     ServiceSummaries,
+    AvailableGroupByAttributes: availableGroupByAttributes,
   };
 }
 
@@ -450,8 +488,31 @@ export function transformGetServiceResponse(pplResponse: PPLDataFrame): any {
   const { StartTime, EndTime } = extractTimeRange(timestamps);
 
   // Handle nested structure from new query format
-  const serviceKeyAttributes = row['service.keyAttributes'];
-  const serviceGroupByAttributes = row['service.groupByAttributes'] || {};
+  // Parse JSON strings if needed
+  let serviceKeyAttributes = row['service.keyAttributes'];
+  if (typeof serviceKeyAttributes === 'string') {
+    try {
+      serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
+    } catch (e) {
+      console.error(
+        '[DEBUG] transformGetServiceResponse: Failed to parse service.keyAttributes:',
+        e
+      );
+    }
+  }
+
+  let serviceGroupByAttributes = row['service.groupByAttributes'] || {};
+  if (typeof serviceGroupByAttributes === 'string') {
+    try {
+      serviceGroupByAttributes = JSON.parse(serviceGroupByAttributes);
+    } catch (e) {
+      console.error(
+        '[DEBUG] transformGetServiceResponse: Failed to parse service.groupByAttributes:',
+        e
+      );
+    }
+  }
+
   const serviceName = serviceKeyAttributes?.name;
   const environmentType = serviceKeyAttributes?.environment;
   const serviceType = serviceKeyAttributes?.type || 'Service';
@@ -564,8 +625,16 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
   }
 
   // PPL query already filters for ServiceOperationDetail events, no need to filter again
-  // Extract dependencies from new nested structure
-  const dependencyMap = new Map<string, number>();
+  // Extract operation-level dependencies using composite keys (service:operation)
+  interface DependencyData {
+    serviceName: string;
+    environment: string;
+    serviceOperation: string;
+    remoteOperation: string;
+    callCount: number;
+  }
+
+  const dependencyMap = new Map<string, DependencyData>();
 
   rows.forEach((row) => {
     // Handle both nested object and flat field names
@@ -573,19 +642,45 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
       row.operation?.remoteService?.keyAttributes?.name ||
       row['operation.remoteService.keyAttributes']?.name;
 
+    const dependencyEnv =
+      row.operation?.remoteService?.keyAttributes?.environment ||
+      row['operation.remoteService.keyAttributes']?.environment ||
+      'generic:default';
+
+    const serviceOperation = row.operation?.name || row['operation.name'] || 'unknown';
+
+    const remoteOperation =
+      row.operation?.remoteOperationName || row['operation.remoteOperationName'] || 'unknown';
+
     if (dependencyName && dependencyName !== 'unknown') {
-      const currentCount = dependencyMap.get(dependencyName) || 0;
-      dependencyMap.set(dependencyName, currentCount + 1);
+      // Create composite key for service+operation combination
+      const compositeKey = `${dependencyName}:${serviceOperation}:${remoteOperation}`;
+
+      const existing = dependencyMap.get(compositeKey);
+      if (existing) {
+        existing.callCount++;
+      } else {
+        dependencyMap.set(compositeKey, {
+          serviceName: dependencyName,
+          environment: dependencyEnv,
+          serviceOperation,
+          remoteOperation,
+          callCount: 1,
+        });
+      }
     }
   });
 
-  const dependencies = Array.from(dependencyMap.entries()).map(([name, count]) => ({
-    DependencyName: name,
-    CallCount: count,
+  const dependencies = Array.from(dependencyMap.values()).map((dep) => ({
+    DependencyName: dep.serviceName,
+    Environment: dep.environment,
+    ServiceOperation: dep.serviceOperation,
+    RemoteOperation: dep.remoteOperation,
+    CallCount: dep.callCount,
   }));
 
   console.log(
-    `[DEBUG] transformListServiceDependenciesResponse: Found ${dependencies.length} unique dependencies`
+    `[DEBUG] transformListServiceDependenciesResponse: Found ${dependencies.length} unique operation-level dependencies`
   );
 
   const timestamps = rows
@@ -693,10 +788,33 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
   rows.forEach((row, index) => {
     // Extract service information from new nested structure
     // PPL returns fields with dot notation as string keys
-    const serviceKeyAttributes = row['service.keyAttributes'];
+    // Parse JSON strings if needed
+    let serviceKeyAttributes = row['service.keyAttributes'];
+    if (typeof serviceKeyAttributes === 'string') {
+      try {
+        serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
+      } catch (e) {
+        console.error(
+          '[DEBUG] transformGetServiceMapResponse: Failed to parse service.keyAttributes:',
+          e
+        );
+      }
+    }
+
+    let serviceGroupByAttributes = row['service.groupByAttributes'] || {};
+    if (typeof serviceGroupByAttributes === 'string') {
+      try {
+        serviceGroupByAttributes = JSON.parse(serviceGroupByAttributes);
+      } catch (e) {
+        console.error(
+          '[DEBUG] transformGetServiceMapResponse: Failed to parse service.groupByAttributes:',
+          e
+        );
+      }
+    }
+
     const serviceName = serviceKeyAttributes?.name;
     const environmentType = serviceKeyAttributes?.environment;
-    const serviceGroupByAttributes = row['service.groupByAttributes'] || {};
     const platformType = environmentType
       ? getPlatformTypeFromEnvironment(environmentType)
       : 'Generic';
@@ -846,8 +964,30 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
   // Build edges from service relationships
   const edges = rows
     .map((row, index) => {
-      const serviceKeyAttributes = row['service.keyAttributes'];
-      const remoteServiceKeyAttributes = row['remoteService.keyAttributes'];
+      // Parse JSON strings if needed
+      let serviceKeyAttributes = row['service.keyAttributes'];
+      if (typeof serviceKeyAttributes === 'string') {
+        try {
+          serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
+        } catch (e) {
+          console.error(
+            '[DEBUG] transformGetServiceMapResponse (edges): Failed to parse service.keyAttributes:',
+            e
+          );
+        }
+      }
+
+      let remoteServiceKeyAttributes = row['remoteService.keyAttributes'];
+      if (typeof remoteServiceKeyAttributes === 'string') {
+        try {
+          remoteServiceKeyAttributes = JSON.parse(remoteServiceKeyAttributes);
+        } catch (e) {
+          console.error(
+            '[DEBUG] transformGetServiceMapResponse (edges): Failed to parse remoteService.keyAttributes:',
+            e
+          );
+        }
+      }
 
       const serviceName = serviceKeyAttributes?.name;
       const environmentType = serviceKeyAttributes?.environment;
@@ -1035,7 +1175,7 @@ export function transformListServicesStatsResponse(pplResponse: PPLDataFrame): a
 }
 
 export class ResponseProcessor {
-  static transformListServices = transformListServicesStatsResponse; // Use stats version
+  static transformListServices = transformListServicesResponse; // Use non-stats version (matches AWS plugin)
   static transformGetService = transformGetServiceResponse;
   static transformListServiceOperations = transformListServiceOperationsResponse;
   static transformListServiceDependencies = transformListServiceDependenciesResponse;

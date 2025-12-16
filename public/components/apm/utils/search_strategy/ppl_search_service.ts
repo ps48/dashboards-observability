@@ -4,8 +4,16 @@
  */
 
 import { ISearchStart } from '../../../../../../src/plugins/data/public';
-import { PPLQueryBuilder } from '../query_requests/ppl_query_builder';
+import {
+  getQueryListServices,
+  getQueryGetService,
+  getQueryListServiceOperations,
+  getQueryListServiceDependencies,
+  getQueryGetServiceMap,
+} from '../query_requests/ppl_queries';
 import { ResponseProcessor } from '../query_requests/response_processor';
+import { coreRefs } from '../../../../framework/core_refs';
+import { DEFAULT_OPENSEARCH_DATASOURCE_ID } from '../config';
 import {
   ListServicesRequest,
   GetServiceRequest,
@@ -15,12 +23,13 @@ import {
 } from '../../types/apm_types';
 
 /**
- * PPLSearchService - Frontend service for executing PPL queries using search strategies
+ * PPLSearchService - Frontend service for executing PPL queries via server API
  *
- * This service uses the data plugin's search service with the 'ppl' search strategy.
- * Authentication is handled automatically via browser credentials.
+ * This service makes HTTP calls to the server-side APM API which handles
+ * PPL queries through the data plugin's search service. This ensures
+ * consistent behavior with PromQL queries and proper authentication.
  *
- * Pattern: React Component → PPLSearchService → Data Plugin Search → PPL Strategy → OpenSearch
+ * Pattern: React Component → PPLSearchService → Server API → Data Plugin Search → PPL Strategy → OpenSearch
  */
 export class PPLSearchService {
   constructor(private readonly searchService: ISearchStart) {}
@@ -31,19 +40,18 @@ export class PPLSearchService {
   async listServices(params: ListServicesRequest): Promise<any> {
     const { queryIndex, startTime, endTime } = params;
 
-    const pplQuery = PPLQueryBuilder.buildListServicesQuery({
-      queryIndex: queryIndex || 'otel-apm-service-map',
-      startTime,
-      endTime,
-    });
+    const pplQuery = getQueryListServices(queryIndex || 'otel-apm-service-map', startTime, endTime);
 
-    const searchRequest = this.buildSearchRequest(pplQuery, queryIndex || 'otel-apm-service-map');
-    const searchResponse = await this.executePPLQuery(searchRequest);
+    const searchResponse = await this.executePPLQuery(
+      pplQuery,
+      queryIndex || 'otel-apm-service-map'
+    );
 
-    // Transform the response - pplraw returns raw PPL response
-    const services = ResponseProcessor.transformListServices(searchResponse);
+    // Transform the response
+    const transformedResponse = ResponseProcessor.transformListServices(searchResponse);
 
-    return services;
+    // Return the full transformed response including AvailableGroupByAttributes
+    return transformedResponse;
   }
 
   /**
@@ -52,17 +60,20 @@ export class PPLSearchService {
   async getService(params: GetServiceRequest): Promise<any> {
     const { queryIndex, startTime, endTime, keyAttributes } = params;
 
-    const pplQuery = PPLQueryBuilder.buildGetServiceQuery({
-      queryIndex: queryIndex || 'otel-apm-service-map',
+    const pplQuery = getQueryGetService(
+      queryIndex || 'otel-apm-service-map',
       startTime,
       endTime,
-      keyAttributes,
-    });
+      keyAttributes?.Environment,
+      keyAttributes?.Name
+    );
 
-    const searchRequest = this.buildSearchRequest(pplQuery, queryIndex || 'otel-apm-service-map');
-    const searchResponse = await this.executePPLQuery(searchRequest);
+    const searchResponse = await this.executePPLQuery(
+      pplQuery,
+      queryIndex || 'otel-apm-service-map'
+    );
 
-    // Transform the response - pplraw returns raw PPL response
+    // Transform the response
     return ResponseProcessor.transformGetService(searchResponse);
   }
 
@@ -72,17 +83,20 @@ export class PPLSearchService {
   async listServiceOperations(params: ListServiceOperationsRequest): Promise<any> {
     const { queryIndex, startTime, endTime, keyAttributes } = params;
 
-    const pplQuery = PPLQueryBuilder.buildListServiceOperationsQuery({
-      queryIndex: queryIndex || 'otel-apm-service-map',
+    const pplQuery = getQueryListServiceOperations(
+      queryIndex || 'otel-apm-service-map',
       startTime,
       endTime,
-      keyAttributes,
-    });
+      keyAttributes?.Environment,
+      keyAttributes?.Name
+    );
 
-    const searchRequest = this.buildSearchRequest(pplQuery, queryIndex || 'otel-apm-service-map');
-    const searchResponse = await this.executePPLQuery(searchRequest);
+    const searchResponse = await this.executePPLQuery(
+      pplQuery,
+      queryIndex || 'otel-apm-service-map'
+    );
 
-    // Transform the response - pplraw returns raw PPL response
+    // Transform the response
     return ResponseProcessor.transformListServiceOperations(searchResponse);
   }
 
@@ -92,17 +106,20 @@ export class PPLSearchService {
   async listServiceDependencies(params: ListServiceDependenciesRequest): Promise<any> {
     const { queryIndex, startTime, endTime, keyAttributes } = params;
 
-    const pplQuery = PPLQueryBuilder.buildListServiceDependenciesQuery({
-      queryIndex: queryIndex || 'otel-apm-service-map',
+    const pplQuery = getQueryListServiceDependencies(
+      queryIndex || 'otel-apm-service-map',
       startTime,
       endTime,
-      keyAttributes,
-    });
+      keyAttributes?.Environment,
+      keyAttributes?.Name
+    );
 
-    const searchRequest = this.buildSearchRequest(pplQuery, queryIndex || 'otel-apm-service-map');
-    const searchResponse = await this.executePPLQuery(searchRequest);
+    const searchResponse = await this.executePPLQuery(
+      pplQuery,
+      queryIndex || 'otel-apm-service-map'
+    );
 
-    // Transform the response - pplraw returns raw PPL response
+    // Transform the response
     return ResponseProcessor.transformListServiceDependencies(searchResponse);
   }
 
@@ -112,71 +129,70 @@ export class PPLSearchService {
   async getServiceMap(params: GetServiceMapRequest): Promise<any> {
     const { queryIndex, startTime, endTime } = params;
 
-    const pplQuery = PPLQueryBuilder.buildGetServiceMapQuery({
-      queryIndex: queryIndex || 'otel-apm-service-map',
+    const pplQuery = getQueryGetServiceMap(
+      queryIndex || 'otel-apm-service-map',
       startTime,
-      endTime,
-    });
+      endTime
+    );
 
-    const searchRequest = this.buildSearchRequest(pplQuery, queryIndex || 'otel-apm-service-map');
-    const searchResponse = await this.executePPLQuery(searchRequest);
+    const searchResponse = await this.executePPLQuery(
+      pplQuery,
+      queryIndex || 'otel-apm-service-map'
+    );
 
-    // Transform the response - pplraw returns raw PPL response
+    // Transform the response
     return ResponseProcessor.transformGetServiceMap(searchResponse);
   }
 
   /**
-   * Build search request for PPL Raw strategy
+   * Execute an arbitrary PPL query
+   *
+   * Public method to execute any PPL query. Useful for custom queries
+   * that don't fit the predefined methods.
    *
    * @param pplQuery The PPL query string
-   * @param datasetId The dataset/index identifier (e.g., 'otel-apm-service-map')
-   *
-   * The request format matches what ppl_raw_search_strategy expects:
-   * - params.body contains the query
-   * - format: 'jdbc' ensures proper response formatting
+   * @param datasetId The dataset/index identifier (default: 'otel-apm-service-map')
    */
-  private buildSearchRequest(pplQuery: string, datasetId: string): any {
-    return {
-      params: {
-        index: datasetId,
-        body: {
-          query: pplQuery,
-          language: 'PPL',
-          format: 'jdbc',
-        },
-      },
-    };
+  async executeQuery(pplQuery: string, datasetId: string = 'otel-apm-service-map'): Promise<any> {
+    return this.executePPLQuery(pplQuery, datasetId);
   }
 
   /**
-   * Execute a PPL query using the PPL Raw search strategy
+   * Execute a PPL query via server-side API
    *
-   * This method uses the data plugin's search service with the 'pplraw' strategy.
-   * The 'pplraw' strategy is designed for direct use from the frontend and properly
-   * handles authentication via the browser's HTTP request.
+   * This method makes an HTTP call to the server-side APM API which executes
+   * the query using the 'ppl' search strategy. This ensures consistent behavior
+   * with PromQL queries and proper authentication.
+   *
+   * @param pplQuery The PPL query string
+   * @param datasetId The dataset/index identifier (e.g., 'otel-apm-service-map')
    */
-  private async executePPLQuery(searchRequest: any): Promise<any> {
-    try {
-      // Execute using PPL Raw search strategy from frontend
-      // The 'pplraw' strategy uses request.rawRequest for authentication
-      // which is automatically provided by the browser
-      const searchResponse = await this.searchService
-        .search(searchRequest, {
-          strategy: 'pplraw',
-        })
-        .toPromise();
+  private async executePPLQuery(pplQuery: string, datasetId: string): Promise<any> {
+    const requestBody = {
+      query: pplQuery,
+      datasetId,
+      opensearchDataSourceId: DEFAULT_OPENSEARCH_DATASOURCE_ID,
+    };
 
-      // pplraw returns { rawResponse } structure
-      return searchResponse.rawResponse || searchResponse;
+    try {
+      // Execute via server-side API which handles authentication
+      const response = await coreRefs.http!.post('/api/apm/ppl/query', {
+        body: JSON.stringify(requestBody),
+      });
+
+      return response;
     } catch (error) {
-      console.error('PPL Query execution failed:', error);
+      console.error('[PPLSearchService] Query execution failed:', error);
 
       // Handle index not found / unauthorized errors more gracefully
       if (
         error.message?.includes('Unauthorized') ||
-        error.message?.includes('index_not_found_exception')
+        error.message?.includes('index_not_found_exception') ||
+        error.message?.includes('no such index')
       ) {
-        console.warn('Index may not exist or user lacks permissions. Returning empty result.');
+        console.warn(
+          '[PPLSearchService] Index may not exist or user lacks permissions. Returning empty result.'
+        );
         return {
           schema: [],
           datarows: [],

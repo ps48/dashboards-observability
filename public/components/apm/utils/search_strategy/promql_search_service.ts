@@ -4,16 +4,20 @@
  */
 
 import { ISearchStart } from '../../../../../../src/plugins/data/public';
+import { coreRefs } from '../../../../framework/core_refs';
 import { PromQLQueryBuilder } from '../query_requests/promql_query_builder';
 import { ExecuteMetricRequestParams } from '../../types/prometheus_types';
+import { DEFAULT_OPENSEARCH_DATASOURCE_ID } from '../config';
 
 /**
- * PromQLSearchService - Frontend service for executing PromQL queries using search strategies
+ * PromQLSearchService - Frontend service for executing PromQL queries via server API
  *
- * This service uses the data plugin's search service with the 'promql' search strategy.
- * Authentication is handled automatically via browser credentials.
+ * This service makes HTTP calls to the server-side APM API which handles
+ * PromQL queries through the data plugin's search service. This avoids
+ * authentication issues that occur when using the search strategy directly
+ * from the client.
  *
- * Pattern: React Component → PromQLSearchService → Data Plugin Search → PromQL Strategy → Prometheus
+ * Pattern: React Component → PromQLSearchService → Server API → Data Plugin Search → PromQL Strategy → Prometheus
  */
 export class PromQLSearchService {
   constructor(
@@ -27,38 +31,26 @@ export class PromQLSearchService {
   async executeMetricRequest(params: ExecuteMetricRequestParams): Promise<any> {
     const { query, startTime, endTime, step } = params;
 
-    const searchRequest = {
-      body: {
-        query: {
-          query,
-          language: 'PROMQL',
-          dataset: {
-            id: this.prometheusConnectionId,
-            title: `Prometheus connection ${this.prometheusConnectionId}`,
-            type: 'PROMETHEUS',
-          },
-        },
-        timeRange: {
-          from: new Date(startTime * 1000).toISOString(),
-          to: new Date(endTime * 1000).toISOString(),
-        },
-        ...(step && { step }),
+    const requestBody = {
+      query,
+      prometheusConnectionName: this.prometheusConnectionId,
+      opensearchDataSourceId: DEFAULT_OPENSEARCH_DATASOURCE_ID,
+      timeRange: {
+        from: new Date(startTime * 1000).toISOString(),
+        to: new Date(endTime * 1000).toISOString(),
       },
+      ...(step && { step }),
     };
 
     try {
-      // Execute using PromQL search strategy from frontend
-      // Browser automatically provides authentication credentials
-      const searchResponse = await this.searchService
-        .search(searchRequest, {
-          strategy: 'promql',
-        })
-        .toPromise();
+      // Execute via server-side API which handles authentication
+      const response = await coreRefs.http!.post('/api/apm/promql/query', {
+        body: JSON.stringify(requestBody),
+      });
 
-      // Return the raw response or body depending on the structure
-      return searchResponse.rawResponse || searchResponse.body;
+      return response;
     } catch (error) {
-      console.error('PromQL Query execution failed:', error);
+      console.error('[PromQLSearchService] Query execution failed:', error);
       throw error;
     }
   }

@@ -38,6 +38,8 @@ describe('useEmbeddable', () => {
   });
 
   it('should create PromQL embeddable with correct input', () => {
+    const { result } = renderHook(() => useEmbeddable());
+
     const params = {
       promqlQuery: 'rate(http_requests_total[5m])',
       prometheusConnectionId: 'prometheus-1',
@@ -166,9 +168,25 @@ describe('useEmbeddable', () => {
   });
 
   it('should generate unique embeddable IDs', () => {
+    const { result } = renderHook(() => useEmbeddable());
+
     // Mock Date.now to return different values
     let mockTime = 1000000;
     jest.spyOn(Date, 'now').mockImplementation(() => mockTime++);
+
+    result.current.createPromQLEmbeddable({
+      promqlQuery: 'up',
+      prometheusConnectionId: 'prom-1',
+      timeRange: { from: 'now-1h', to: 'now' },
+      title: 'Test 1',
+    });
+
+    result.current.createPromQLEmbeddable({
+      promqlQuery: 'up',
+      prometheusConnectionId: 'prom-1',
+      timeRange: { from: 'now-1h', to: 'now' },
+      title: 'Test 2',
+    });
 
     const id1 = mockFactory.create.mock.calls[0][0].id;
     const id2 = mockFactory.create.mock.calls[1][0].id;

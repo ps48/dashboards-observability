@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { EuiPanel, EuiLoadingChart, EuiText, EuiSpacer } from '@elastic/eui';
-import { useEmbeddable } from '../../utils/hooks/use_embeddable';
+import React, { useMemo } from 'react';
+import { EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
+import { coreRefs } from '../../../../framework/core_refs';
 import { TimeRange } from '../../services/types';
+import { EmbeddableRenderer } from '../embeddable_renderer';
 
 export interface EmbeddablePromQLContainerProps {
   promqlQuery: string;
@@ -30,89 +31,108 @@ export const EmbeddablePromQLContainer: React.FC<EmbeddablePromQLContainerProps>
   prometheusConnectionId,
   timeRange,
   title,
-  chartType = 'line',
+  _chartType = 'line',
   height = 300,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const embeddableRef = useRef<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const factory = useMemo(() => {
+    return coreRefs.embeddable?.getEmbeddableFactory('explore');
+  }, []);
 
-  const { createPromQLEmbeddable } = useEmbeddable();
-
-  useEffect(() => {
-    const initEmbeddable = async () => {
-      if (!containerRef.current) return;
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Create embeddable
-        const embeddable = createPromQLEmbeddable({
-          promqlQuery,
-          prometheusConnectionId,
-          timeRange,
-          title,
-          chartType,
-        });
-
-        if (!embeddable) {
-          throw new Error('Failed to create embeddable');
-        }
-
-        // Store reference for cleanup
-        embeddableRef.current = embeddable;
-
-        // Render embeddable
-        await embeddable.render(containerRef.current);
-
-        setIsLoading(false);
-      } catch (err) {
-        console.error('[EmbeddablePromQLContainer] Error creating embeddable:', err);
-        setError(err.message || 'Failed to load visualization');
-        setIsLoading(false);
-      }
+  const input = useMemo(() => {
+    // Use echarts_line with proper configuration
+    const visualization = {
+      title: '',
+      chartType: 'echarts_line',
+      params: {
+        addLegend: true,
+        legendTitle: '',
+        legendPosition: 'bottom',
+        lineMode: 'straight',
+        lineWidth: 2,
+        showSymbol: false,
+        symbolSize: 4,
+        areaStyle: false,
+        areaOpacity: 0.3,
+        tooltipOptions: {
+          mode: 'all',
+        },
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+        showXAxisLabel: true,
+        showYAxisLabel: true,
+      },
+      axesMapping: {
+        x: 'Time',
+        y: 'Value',
+        color: 'Series',
+      },
     };
 
-    initEmbeddable();
-
-    // Cleanup on unmount
-    return () => {
-      if (embeddableRef.current && embeddableRef.current.destroy) {
-        embeddableRef.current.destroy();
-        embeddableRef.current = null;
-      }
+    return {
+      id: `apm-promql-${Date.now()}-${Math.random()}`,
+      timeRange: {
+        from: timeRange.from,
+        to: timeRange.to,
+      },
+      attributes: {
+        title,
+        visualization: JSON.stringify(visualization),
+        uiState: JSON.stringify({
+          activeTab: 'explore_visualization_tab',
+        }),
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            query: {
+              query: promqlQuery,
+              language: 'PROMQL',
+              dataset: {
+                id: prometheusConnectionId,
+                title: prometheusConnectionId,
+                type: 'PROMETHEUS',
+                language: 'PROMQL',
+                timeFieldName: 'Time',
+              },
+            },
+            filter: [],
+          }),
+        },
+      },
+      references: [],
     };
-  }, [promqlQuery, prometheusConnectionId, timeRange, title, chartType, createPromQLEmbeddable]);
+  }, [promqlQuery, prometheusConnectionId, timeRange, title]);
+
+  if (!factory) {
+    return (
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
+        <EuiText size="s">
+          <h4>{title}</h4>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <div style={{ padding: '1rem' }}>Explore embeddable factory not available</div>
+      </EuiPanel>
+    );
+  }
 
   return (
-    <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
-      <EuiText size="s">
-        <h4>{title}</h4>
-      </EuiText>
-      <EuiSpacer size="s" />
-
-      {isLoading && (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <EuiLoadingChart size="l" />
-        </div>
+    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+      <style>{`
+        .visChart__container {
+          overflow: visible !important;
+        }
+      `}</style>
+      {title && (
+        <>
+          <EuiText size="s">
+            <h4>{title}</h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
       )}
-
-      {error && (
-        <EuiText color="danger" size="s">
-          <p>{error}</p>
-        </EuiText>
-      )}
-
-      <div
-        ref={containerRef}
-        style={{
-          height: `${height}px`,
-          display: isLoading || error ? 'none' : 'block',
-        }}
-        data-test-subj="embeddablePromqlContainer"
-      />
+      <div style={{ width: '100%', minHeight: `${height}px` }}>
+        <EmbeddableRenderer factory={factory} input={input} />
+      </div>
     </EuiPanel>
   );
 };

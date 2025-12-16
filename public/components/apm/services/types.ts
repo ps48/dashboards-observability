@@ -7,9 +7,9 @@
  * Service item for display in the services table
  */
 export interface ServiceTableItem {
-  serviceId: string;
   serviceName: string;
   environment: string;
+  groupByAttributes?: Record<string, any>;
 }
 
 /**
