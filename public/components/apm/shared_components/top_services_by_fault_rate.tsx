@@ -45,10 +45,14 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
   refreshTrigger,
 }) => {
   // Parse time range - handle both absolute and relative times
-  const startTime = timeRange.from.startsWith('now')
-    ? new Date(Date.now() - 15 * 60 * 1000) // Default to 15 min for relative
-    : new Date(timeRange.from);
-  const endTime = timeRange.to === 'now' ? new Date() : new Date(timeRange.to);
+  // Memoize to prevent creating new Date objects on every render
+  const { startTime, endTime } = useMemo(() => {
+    const start = timeRange.from.startsWith('now')
+      ? new Date(Date.now() - 15 * 60 * 1000) // Default to 15 min for relative
+      : new Date(timeRange.from);
+    const end = timeRange.to === 'now' ? new Date() : new Date(timeRange.to);
+    return { startTime: start, endTime: end };
+  }, [timeRange.from, timeRange.to]);
 
   const { data: services, isLoading, error } = useTopServicesByFaultRate({
     startTime,

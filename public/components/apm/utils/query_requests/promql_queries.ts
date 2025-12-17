@@ -16,7 +16,7 @@
  * - latency_seconds_seconds_max: Maximum latency
  * - latency_seconds_seconds_min: Minimum latency
  *
- * Common labels: service, environment, operation, remote_service
+ * Common labels: service, environment, operation, remoteService
  * Note: span_kind label may not be available in all metrics
  */
 
@@ -93,7 +93,7 @@ export const getQueryTopDependenciesByLatency = (
 ): string => `
 topk(5,
   histogram_quantile(${percentile},
-    sum by (remote_service, le) (
+    sum by (remoteService, le) (
       latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
     )
   )
@@ -105,7 +105,7 @@ label_replace(
       latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
     )
   ),
-  "remote_service",
+  "remoteService",
   "overall",
   "",
   ""
@@ -119,7 +119,7 @@ label_replace(
 export const QUERY_TOP_DEPENDENCIES_BY_LATENCY = `
 topk(5,
   histogram_quantile(0.95,
-    sum by (environment, service, remote_service, le) (
+    sum by (environment, service, remoteService, le) (
       latency_seconds_seconds_bucket{namespace="span_derived"}
     )
   )
@@ -132,7 +132,7 @@ topk(5,
  */
 export const QUERY_TOP_DEPENDENCIES_BY_VOLUME = `
 topk(5,
-  sum by (environment, service, remote_service) (
+  sum by (environment, service, remoteService) (
     request
   )
 )
@@ -144,7 +144,7 @@ topk(5,
  */
 export const QUERY_TOP_DEPENDENCIES_BY_FAULT = `
 topk(5,
-  sum by (environment, service, remote_service) (
+  sum by (environment, service, remoteService) (
     fault
   )
 )
@@ -723,7 +723,7 @@ export const getQueryDependencyCallRate = (
   serviceName: string,
   remoteService: string
 ): string => `
-sum(request{environment="${environment}",service="${serviceName}",remote_service="${remoteService}"})
+sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}"})
 `;
 
 /**
@@ -735,9 +735,9 @@ export const getQueryDependencyErrorRate = (
   serviceName: string,
   remoteService: string
 ): string => `
-sum(error{environment="${environment}",service="${serviceName}",remote_service="${remoteService}"})
+sum(error{environment="${environment}",service="${serviceName}",remoteService="${remoteService}"})
 /
-sum(request{environment="${environment}",service="${serviceName}",remote_service="${remoteService}"})
+sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}"})
 `;
 
 /**
@@ -752,7 +752,7 @@ export const getQueryDependencyLatencyP95 = (
 ): string => `
 histogram_quantile(0.95,
   sum by (le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",remote_service="${remoteService}"}
+    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}"}
   )
 )
 `;

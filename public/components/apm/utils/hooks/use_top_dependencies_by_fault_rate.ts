@@ -170,13 +170,7 @@ export const useTopDependenciesByFaultRate = (
     };
 
     fetchTopDependencies();
-  }, [
-    params.prometheusConnectionId,
-    promqlSearchService,
-    fetchParams,
-    refetchTrigger,
-    params.refreshTrigger,
-  ]);
+  }, [params.prometheusConnectionId, fetchParams, refetchTrigger, params.refreshTrigger]);
 
   const refetch = () => {
     setRefetchTrigger((prev) => prev + 1);

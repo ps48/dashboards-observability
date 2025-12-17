@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiCallOut,
   EuiButtonGroup,
+  EuiButton,
 } from '@elastic/eui';
 import { useServiceDetails } from '../../utils/hooks/use_service_details';
 import { EmbeddableMetricCard } from '../../shared_components/embeddable_metric_card';
@@ -21,6 +22,7 @@ import { EmbeddablePromQLContainer } from '../../shared_components/embeddable_pr
 import { ServiceTopDependenciesWidget } from '../../shared_components/service_top_dependencies_widget';
 import { TimeRange } from '../../services/types';
 import { parseTimeRange } from '../../utils/time_utils';
+import { navigateToErrorTraces } from '../../utils/navigation_utils';
 import {
   getQueryServiceRequests,
   getQueryServiceFaults,
@@ -145,6 +147,15 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                 <EuiText size="s" color="subdued">
                   <strong>Type:</strong> {serviceDetails.type}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton
+                  size="s"
+                  iconType="discoverApp"
+                  onClick={() => navigateToErrorTraces(serviceName, timeRange)}
+                >
+                  View Error Traces
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
