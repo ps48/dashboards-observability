@@ -15,10 +15,14 @@ import {
   EuiBasicTableColumn,
   EuiLink,
 } from '@elastic/eui';
+import { Card, CardHeader, CardTitle, CardContent } from '@virajsanghvi/oui';
 import { useTopDependenciesByFaultRate } from '../utils/hooks/use_top_dependencies_by_fault_rate';
 import { TimeRange } from '../services/types';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
+import { USE_OUI_V2 } from '../utils/config';
+import { TopFaultRateWidgetSkeleton } from './v2/widget_skeleton';
+import { OuiTable } from './v2/table';
 
 export interface TopDependenciesByFaultRateProps {
   timeRange: TimeRange;
@@ -85,8 +89,8 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     }));
   }, [dependencies]);
 
-  // Define table columns
-  const columns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [
+  // Define table columns for EUI (fallback)
+  const euiColumns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [
     {
       field: 'target',
       name: 'Remote Service',
@@ -124,8 +128,45 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     },
   ];
 
+  // Define table columns for OUI 2.0
+  const ouiColumns = [
+    {
+      field: 'target' as keyof DependencyFaultRateItem,
+      name: 'Remote Service',
+      width: '30%',
+      truncateText: true,
+      render: (item: DependencyFaultRateItem) => (
+        <span className="oui:text-sm oui:font-medium oui:text-blue-600">{item.target}</span>
+      ),
+    },
+    {
+      name: 'Service',
+      width: '30%',
+      truncateText: true,
+      render: (item: DependencyFaultRateItem) => (
+        <ServiceCell
+          service={item.source}
+          environment={item.sourceEnvironment}
+          href={item.sourceHref}
+          onClick={
+            onServiceClick ? () => onServiceClick(item.source, item.sourceEnvironment) : undefined
+          }
+        />
+      ),
+    },
+    {
+      name: 'Fault Rate',
+      width: '40%',
+      render: (item: DependencyFaultRateItem) => (
+        <FaultRateCell faultRate={item.faultRate} relativePercentage={item.relativePercentage} />
+      ),
+    },
+  ];
+
   if (isLoading) {
-    return (
+    return USE_OUI_V2 ? (
+      <TopFaultRateWidgetSkeleton rows={5} />
+    ) : (
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
@@ -147,7 +188,25 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     const isAuthError =
       error.message.includes('Unauthorized') || error.message.includes('Authentication');
 
-    return (
+    return USE_OUI_V2 ? (
+      <Card className="oui:h-full">
+        <CardHeader>
+          <CardTitle>Top Dependency Paths by Fault Rate</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="oui:text-sm oui:text-gray-600">
+            {isConfigError || isAuthError ? (
+              <>
+                Prometheus connection required. Configure a Prometheus data source to view
+                dependency fault rate metrics.
+              </>
+            ) : (
+              <>Error loading dependency fault rate data: {error.message}</>
+            )}
+          </p>
+        </CardContent>
+      </Card>
+    ) : (
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
@@ -170,7 +229,16 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
   }
 
   if (!dependencies || dependencies.length === 0) {
-    return (
+    return USE_OUI_V2 ? (
+      <Card className="oui:h-full">
+        <CardHeader>
+          <CardTitle>Top Dependency Paths by Fault Rate</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="oui:text-sm oui:text-gray-600">No dependency fault rate data available</p>
+        </CardContent>
+      </Card>
+    ) : (
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
@@ -185,14 +253,23 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     );
   }
 
-  return (
+  return USE_OUI_V2 ? (
+    <Card className="oui:h-full">
+      <CardHeader>
+        <CardTitle>Top Dependency Paths by Fault Rate</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <OuiTable items={tableItems} columns={ouiColumns} tableLayout="auto" />
+      </CardContent>
+    </Card>
+  ) : (
     <EuiFlexItem>
       <EuiPanel>
         <EuiText size="m">
           <h3>Top Dependency Paths by Fault Rate</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
+        <EuiBasicTable items={tableItems} columns={euiColumns} tableLayout="auto" />
       </EuiPanel>
     </EuiFlexItem>
   );

@@ -32,13 +32,40 @@ import {
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 import { useServices } from '../../utils/hooks/use_services';
 import { FilterBar } from '../../shared_components/filter_bar';
-import { EmptyState } from '../../shared_components/empty_state';
+import { EmptyState as EuiEmptyState } from '../../shared_components/empty_state';
+import { EmptyState as OuiEmptyState } from '../../shared_components/v2/empty_state';
 import { TopServicesByFaultRate } from '../../shared_components/top_services_by_fault_rate';
 import { TopDependenciesByFaultRate } from '../../shared_components/top_dependencies_by_fault_rate';
 import { TimeRange, ServiceTableItem } from '../../services/types';
 import { parseTimeRange } from '../../utils/time_utils';
-import { DEFAULT_TOPOLOGY_INDEX, DEFAULT_PROMETHEUS_CONNECTION_NAME } from '../../utils/config';
+import { DEFAULT_TOPOLOGY_INDEX, DEFAULT_PROMETHEUS_CONNECTION_NAME, USE_OUI_V2 } from '../../utils/config';
 import { parseEnvironmentType } from '../../utils/query_requests/response_processor';
+import {
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+  Checkbox,
+  Separator,
+  Input,
+  Button,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@virajsanghvi/oui';
+import { ServicesTableSkeleton } from '../../shared_components/v2/loading_skeleton';
+import { BasicTable } from '../../shared_components/v2/basic_table';
+import { OuiTable } from '../../shared_components/v2/table';
+import { OUI2Wrapper } from '../../shared_components/v2/oui2_wrapper';
 
 /**
  * Gets a nested value from an object using dot notation path
@@ -267,7 +294,75 @@ export const Services: React.FC<ApmServicesProps> = ({
     return filtered;
   }, [filteredItems, selectedEnvironments, selectedGroupByAttributes]);
 
-  const columns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
+  // OUI 2.0 columns
+  const ouiColumns = useMemo(
+    () => [
+      {
+        field: 'serviceName' as keyof ServiceTableItem,
+        name: 'Service Name',
+        sortable: true,
+        width: '45%',
+        render: (item: ServiceTableItem) => (
+          <Button
+            variant="link"
+            onClick={() => {
+              if (onServiceClick) {
+                onServiceClick(item.serviceName, item.environment);
+              }
+            }}
+            data-test-subj={`serviceLink-${item.serviceName}`}
+            className="oui:h-auto oui:p-0 oui:font-semibold"
+          >
+            {item.serviceName}
+          </Button>
+        ),
+      },
+      {
+        field: 'environment' as keyof ServiceTableItem,
+        name: 'Environment',
+        sortable: true,
+        width: '45%',
+        render: (item: ServiceTableItem) => {
+          const variant = item.environment === 'production' ? 'default' : 'secondary';
+          return <Badge variant={variant}>{item.environment}</Badge>;
+        },
+      },
+      {
+        name: 'Actions',
+        width: '10%',
+        render: (item: ServiceTableItem) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Actions"
+                data-test-subj={`serviceActionsButton-${item.serviceName}`}
+              >
+                <span className="oui:text-base">⋯</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem
+                onClick={() => onServiceClick?.(item.serviceName, item.environment)}
+              >
+                <span className="oui:mr-2">👁</span>
+                View service details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {}}>
+                <span className="oui:mr-2">📋</span>
+                View traces
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    [onServiceClick]
+  );
+
+  // EUI fallback columns
+  const euiColumns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
     () => [
       {
         field: 'serviceName',
@@ -382,300 +477,238 @@ export const Services: React.FC<ApmServicesProps> = ({
     }
   }, []);
 
-  if (isLoading) {
-    return (
-      <EuiPage data-test-subj="servicesPage">
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 400 }}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="xl" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
+  return USE_OUI_V2 ? (
+    <OUI2Wrapper>
+      <div className="oui:min-h-screen oui:bg-gray-50" data-test-subj="servicesPage">
+        <div className="oui:mx-auto oui:max-w-screen-2xl oui:p-6">
+          {/* Top Filter Bar */}
+          <FilterBar
+            items={services}
+            timeRange={timeRange}
+            onFilteredItems={handleFilteredItems}
+            onTimeChange={handleTimeChange}
+            onRefresh={handleRefresh}
+          />
 
-  if (error) {
-    return (
-      <EuiPage data-test-subj="servicesPage">
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EuiCallOut title="Error loading services" color="danger" iconType="alert">
-                <p>{error.message}</p>
-              </EuiCallOut>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
+          <div className="oui:h-4" />
 
-  if (!services || services.length === 0) {
-    return (
-      <EuiPage data-test-subj="servicesPage">
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EmptyState
-                title="No services found"
-                body="No services detected in the selected time range. Services will appear here once they start sending telemetry data."
-                iconType="search"
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-
-  return (
-    <EuiPage data-test-subj="servicesPage">
-      <EuiPageBody component="main">
-        <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
-          <EuiPageContentBody>
-            {/* Top Filter Bar */}
-            <FilterBar
-              items={services}
-              timeRange={timeRange}
-              onFilteredItems={handleFilteredItems}
-              onTimeChange={handleTimeChange}
-              onRefresh={handleRefresh}
-            />
-
-            <EuiSpacer size="s" />
-
-            {/* Main content with side drawer */}
-            <EuiFlexGroup direction="row" gutterSize="s">
+          {/* Main content with side drawer */}
+          <div className="oui:flex oui:flex-row oui:gap-2">
               {/* Left Side Drawer */}
-              <EuiFlexItem grow={false}>
+              <div className={filterDrawerOpen ? "oui:w-64 oui:shrink-0" : "oui:w-auto oui:shrink-0"}>
                 {filterDrawerOpen ? (
-                  <EuiPanel style={{ width: 250 }}>
-                    <EuiFlexGroup
-                      justifyContent="spaceBetween"
-                      alignItems="center"
-                      gutterSize="none"
-                    >
-                      <EuiFlexItem grow={false}>
-                        <strong>Filters</strong>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
+                  <Card className="oui:h-fit">
+                    <CardHeader>
+                      <div className="oui:flex oui:items-center oui:justify-between">
+                        <CardTitle>Filters</CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => setFilterDrawerOpen(false)}
-                          iconType="menuLeft"
-                          iconSize="m"
-                          color="text"
                           data-test-subj="filter-drawer-close"
                           aria-label="Close filter drawer"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiSpacer size="m" />
-                    <EuiHorizontalRule margin="none" />
-                    <EuiSpacer size="m" />
+                          className="oui:h-6 oui:w-6"
+                        >
+                          <span className="oui:text-lg">←</span>
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <Separator />
+                    <CardContent>
 
                     {/* Environment Filter - Accordion */}
-                    <EuiAccordion
-                      id="environmentAccordion"
-                      buttonContent={
-                        <EuiText size="s">
-                          <strong>Environment</strong>
-                        </EuiText>
-                      }
-                      initialIsOpen={true}
-                      data-test-subj="environmentAccordion"
-                    >
-                      <EuiSpacer size="s" />
+                    <Accordion type="single" defaultValue="environment" collapsible>
+                      <AccordionItem value="environment">
+                        <AccordionTrigger className="oui:text-sm oui:font-semibold">
+                          Environment
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="oui:space-y-3">
+                            {/* Select all / Clear all links */}
+                            {environmentCheckboxes.length > 0 && (
+                              <div className="oui:flex oui:justify-between oui:items-center">
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  onClick={handleSelectAllEnvironments}
+                                  data-test-subj="environment-selectAll"
+                                  className="oui:h-auto oui:p-0 oui:text-xs"
+                                >
+                                  Select all
+                                </Button>
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  onClick={handleClearAllEnvironments}
+                                  data-test-subj="environment-clearAll"
+                                  className="oui:h-auto oui:p-0 oui:text-xs"
+                                >
+                                  Clear all
+                                </Button>
+                              </div>
+                            )}
 
-                      {/* Select all / Clear all links */}
-                      {environmentCheckboxes.length > 0 && (
-                        <>
-                          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-                            <EuiFlexItem grow={false}>
-                              <EuiLink
-                                onClick={handleSelectAllEnvironments}
-                                data-test-subj="environment-selectAll"
-                                color="primary"
-                              >
-                                <EuiText size="xs">Select all</EuiText>
-                              </EuiLink>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiLink
-                                onClick={handleClearAllEnvironments}
-                                data-test-subj="environment-clearAll"
-                                color="primary"
-                              >
-                                <EuiText size="xs">Clear all</EuiText>
-                              </EuiLink>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                          <EuiSpacer size="s" />
-                        </>
-                      )}
-
-                      {/* Checkbox group */}
-                      {environmentCheckboxes.length > 0 ? (
-                        <EuiCheckboxGroup
-                          options={environmentCheckboxes}
-                          idToSelectedMap={selectedEnvironments}
-                          onChange={onEnvironmentChange}
-                          compressed
-                          data-test-subj="environment-checkboxGroup"
-                        />
-                      ) : (
-                        <EuiText size="s" color="subdued">
-                          No environments available
-                        </EuiText>
-                      )}
-                    </EuiAccordion>
+                            {/* Checkbox group */}
+                            {environmentCheckboxes.length > 0 ? (
+                              <div className="oui:space-y-2">
+                                {environmentCheckboxes.map((option) => (
+                                  <div key={option.id} className="oui:flex oui:items-center oui:space-x-2">
+                                    <Checkbox
+                                      id={option.id}
+                                      checked={selectedEnvironments[option.id] || false}
+                                      onCheckedChange={(checked) => {
+                                        onEnvironmentChange(option.id);
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={option.id}
+                                      className="oui:text-sm oui:font-medium oui:leading-none oui:cursor-pointer"
+                                    >
+                                      {option.label}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="oui:text-sm oui:text-gray-600">
+                                No environments available
+                              </p>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
 
                     {/* Dynamic GroupByAttributes Filters - Accordion Structure */}
                     {availableGroupByAttributes &&
                       Object.keys(availableGroupByAttributes).length > 0 && (
-                        <>
-                          <EuiSpacer size="m" />
-                          <EuiAccordion
-                            id="attributesAccordion"
-                            buttonContent={
-                              <EuiText size="s">
-                                <strong>Attributes</strong>
-                              </EuiText>
-                            }
-                            initialIsOpen={true}
-                            data-test-subj="attributesAccordion"
-                          >
-                            <EuiSpacer size="s" />
+                        <div className="oui:mt-4">
+                          <Accordion type="single" defaultValue="attributes" collapsible>
+                            <AccordionItem value="attributes">
+                              <AccordionTrigger className="oui:text-sm oui:font-semibold">
+                                Attributes
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="oui:space-y-4">
+                                  {/* Inner accordions for each attribute */}
+                                  <Accordion type="multiple" className="oui:space-y-2">
+                                    {Object.entries(availableGroupByAttributes).map(
+                                      ([attrPath, _values]) => {
+                                        const filteredValues = filteredAttributeValues[attrPath] || [];
+                                        const searchQuery = attributeSearchQueries[attrPath] || '';
 
-                            {/* Inner accordions for each attribute */}
-                            {Object.entries(availableGroupByAttributes).map(
-                              ([attrPath, _values], index) => {
-                                const filteredValues = filteredAttributeValues[attrPath] || [];
-                                const searchQuery = attributeSearchQueries[attrPath] || '';
+                                        return (
+                                          <AccordionItem key={attrPath} value={attrPath}>
+                                            <AccordionTrigger className="oui:text-xs oui:font-semibold">
+                                              {attrPath}
+                                            </AccordionTrigger>
+                                            <AccordionContent>
+                                              <div className="oui:space-y-3">
+                                                {/* Search box */}
+                                                <Input
+                                                  type="search"
+                                                  placeholder={`Search ${attrPath}`}
+                                                  value={searchQuery}
+                                                  onChange={(e) =>
+                                                    handleSearchChange(attrPath, e.target.value)
+                                                  }
+                                                  className="oui:h-8 oui:text-sm"
+                                                  data-test-subj={`attribute-${attrPath}-search`}
+                                                />
 
-                                return (
-                                  <React.Fragment key={attrPath}>
-                                    {index > 0 && <EuiSpacer size="m" />}
+                                                {/* Select all / Clear all links */}
+                                                {filteredValues.length > 0 && (
+                                                  <div className="oui:flex oui:justify-between oui:items-center">
+                                                    <Button
+                                                      variant="link"
+                                                      size="sm"
+                                                      onClick={() =>
+                                                        handleSelectAllForAttribute(attrPath)
+                                                      }
+                                                      data-test-subj={`attribute-${attrPath}-selectAll`}
+                                                      className="oui:h-auto oui:p-0 oui:text-xs"
+                                                    >
+                                                      Select all
+                                                    </Button>
+                                                    <Button
+                                                      variant="link"
+                                                      size="sm"
+                                                      onClick={() => handleClearAllForAttribute(attrPath)}
+                                                      data-test-subj={`attribute-${attrPath}-clearAll`}
+                                                      className="oui:h-auto oui:p-0 oui:text-xs"
+                                                    >
+                                                      Clear all
+                                                    </Button>
+                                                  </div>
+                                                )}
 
-                                    <EuiAccordion
-                                      id={`attribute-${attrPath}-accordion`}
-                                      buttonContent={
-                                        <EuiText size="xs">
-                                          <strong>{attrPath}</strong>
-                                        </EuiText>
+                                                {/* Checkbox list */}
+                                                {filteredValues.length > 0 ? (
+                                                  <div className="oui:space-y-2">
+                                                    {filteredValues.map((value) => (
+                                                      <div key={value} className="oui:flex oui:items-center oui:space-x-2">
+                                                        <Checkbox
+                                                          id={`${attrPath}-${value}`}
+                                                          checked={selectedGroupByAttributes[attrPath]?.[value] || false}
+                                                          onCheckedChange={(checked) => {
+                                                            setSelectedGroupByAttributes((prev) => ({
+                                                              ...prev,
+                                                              [attrPath]: {
+                                                                ...(prev[attrPath] || {}),
+                                                                [value]: !!checked,
+                                                              },
+                                                            }));
+                                                          }}
+                                                        />
+                                                        <label
+                                                          htmlFor={`${attrPath}-${value}`}
+                                                          className="oui:text-sm oui:font-medium oui:leading-none oui:cursor-pointer"
+                                                        >
+                                                          {value}
+                                                        </label>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                ) : (
+                                                  <p className="oui:text-sm oui:text-gray-600">
+                                                    No matching values
+                                                  </p>
+                                                )}
+                                              </div>
+                                            </AccordionContent>
+                                          </AccordionItem>
+                                        );
                                       }
-                                      initialIsOpen={false}
-                                      data-test-subj={`attribute-${attrPath}-accordion`}
-                                    >
-                                      <EuiSpacer size="s" />
-
-                                      {/* Search box */}
-                                      <EuiFieldSearch
-                                        placeholder={`Search ${attrPath}`}
-                                        value={searchQuery}
-                                        onChange={(e) =>
-                                          handleSearchChange(attrPath, e.target.value)
-                                        }
-                                        isClearable
-                                        fullWidth
-                                        compressed
-                                        data-test-subj={`attribute-${attrPath}-search`}
-                                      />
-
-                                      <EuiSpacer size="s" />
-
-                                      {/* Select all / Clear all links */}
-                                      {filteredValues.length > 0 && (
-                                        <>
-                                          <EuiFlexGroup
-                                            gutterSize="s"
-                                            justifyContent="spaceBetween"
-                                          >
-                                            <EuiFlexItem grow={false}>
-                                              <EuiLink
-                                                onClick={() =>
-                                                  handleSelectAllForAttribute(attrPath)
-                                                }
-                                                data-test-subj={`attribute-${attrPath}-selectAll`}
-                                                color="primary"
-                                              >
-                                                <EuiText size="xs">Select all</EuiText>
-                                              </EuiLink>
-                                            </EuiFlexItem>
-                                            <EuiFlexItem grow={false}>
-                                              <EuiLink
-                                                onClick={() => handleClearAllForAttribute(attrPath)}
-                                                data-test-subj={`attribute-${attrPath}-clearAll`}
-                                                color="primary"
-                                              >
-                                                <EuiText size="xs">Clear all</EuiText>
-                                              </EuiLink>
-                                            </EuiFlexItem>
-                                          </EuiFlexGroup>
-                                          <EuiSpacer size="s" />
-                                        </>
-                                      )}
-
-                                      {/* Checkbox list */}
-                                      {filteredValues.length > 0 ? (
-                                        <EuiCheckboxGroup
-                                          options={filteredValues.map((value) => ({
-                                            id: value,
-                                            label: value,
-                                          }))}
-                                          idToSelectedMap={
-                                            selectedGroupByAttributes[attrPath] || {}
-                                          }
-                                          onChange={(id) => {
-                                            setSelectedGroupByAttributes((prev) => ({
-                                              ...prev,
-                                              [attrPath]: {
-                                                ...(prev[attrPath] || {}),
-                                                [id]: !prev[attrPath]?.[id],
-                                              },
-                                            }));
-                                          }}
-                                          compressed
-                                          data-test-subj={`attribute-${attrPath}-checkboxGroup`}
-                                        />
-                                      ) : (
-                                        <EuiText size="s" color="subdued">
-                                          No matching values
-                                        </EuiText>
-                                      )}
-                                    </EuiAccordion>
-                                  </React.Fragment>
-                                );
-                              }
-                            )}
-                          </EuiAccordion>
-                        </>
+                                    )}
+                                  </Accordion>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
                       )}
-                  </EuiPanel>
+                    </CardContent>
+                  </Card>
                 ) : (
-                  <EuiPanel>
-                    <EuiButtonIcon
+                  <div className="oui:flex oui:items-start">
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() => setFilterDrawerOpen(true)}
-                      iconType="menuRight"
-                      iconSize="m"
-                      color="text"
                       data-test-subj="filter-drawer-open"
                       aria-label="Open filter drawer"
-                    />
-                  </EuiPanel>
+                      className="oui:h-10 oui:w-10 oui:rounded-md oui:border-gray-300 oui:bg-white oui:shadow-sm hover:oui:bg-gray-50"
+                    >
+                      <span className="oui:text-lg oui:font-bold">→</span>
+                    </Button>
+                  </div>
                 )}
-              </EuiFlexItem>
+              </div>
 
               {/* Right Main Content */}
-              <EuiFlexItem>
+              <div className="oui:flex-1 oui:min-w-0">
                 {/* Top Widgets Row */}
-                <EuiFlexGroup gutterSize="s" direction="row" alignItems="stretch">
+                <div className="oui:grid oui:grid-cols-2 oui:gap-4">
                   <TopServicesByFaultRate
                     timeRange={timeRange}
                     prometheusConnectionId={effectivePrometheusConnection}
@@ -688,32 +721,130 @@ export const Services: React.FC<ApmServicesProps> = ({
                     refreshTrigger={refreshTrigger}
                     onServiceClick={onServiceClick}
                   />
-                </EuiFlexGroup>
+                </div>
 
-                <EuiSpacer size="s" />
+                <div className="oui:h-4" />
 
-                {/* Services Table */}
-                {fullyFilteredItems.length === 0 ? (
-                  <EmptyState
+                {/* Services Table Section */}
+                {error ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Error loading services</AlertTitle>
+                    <AlertDescription>{error.message}</AlertDescription>
+                  </Alert>
+                ) : isLoading ? (
+                  <ServicesTableSkeleton rows={pageSize} />
+                ) : !services || services.length === 0 ? (
+                  <OuiEmptyState
+                    title="No services found"
+                    body="No services detected in the selected time range. Services will appear here once they start sending telemetry data."
+                    iconType="search"
+                  />
+                ) : fullyFilteredItems.length === 0 ? (
+                  <OuiEmptyState
                     title="No matching services"
                     body="Try adjusting your search query or time range to find services."
                     iconType="search"
                   />
                 ) : (
-                  <EuiBasicTable
-                    items={fullyFilteredItems}
-                    columns={columns}
-                    sorting={sorting}
-                    pagination={pagination}
-                    onChange={onTableChange}
-                    data-test-subj="servicesTable"
-                  />
+                  <Card className="oui:w-full oui:overflow-hidden">
+                    <CardContent className="oui:p-0">
+                      <div className="oui:overflow-x-auto oui:bg-white">
+                        <div className="oui:inline-block oui:bg-white">
+                          <OuiTable
+                            items={fullyFilteredItems.slice(
+                              pageIndex * pageSize,
+                              (pageIndex + 1) * pageSize
+                            )}
+                            columns={ouiColumns}
+                            sorting={sorting}
+                            onChange={onTableChange}
+                            tableLayout="auto"
+                          />
+                        </div>
+                      </div>
+                      {/* Pagination Controls */}
+                      <div className="oui:flex oui:items-center oui:justify-between oui:border-t oui:border-gray-200 oui:bg-white oui:px-4 oui:py-3">
+                        <div className="oui:flex oui:items-center oui:gap-2">
+                          <span className="oui:text-sm oui:text-gray-700">Rows per page:</span>
+                          <select
+                            value={pageSize}
+                            onChange={(e) => {
+                              setPageSize(Number(e.target.value));
+                              setPageIndex(0);
+                            }}
+                            className="oui:rounded-md oui:border oui:border-gray-300 oui:px-2 oui:py-1 oui:text-sm focus:oui:border-blue-500 focus:oui:outline-none focus:oui:ring-1 focus:oui:ring-blue-500"
+                          >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                          </select>
+                        </div>
+                        <div className="oui:flex oui:items-center oui:gap-4">
+                          <span className="oui:text-sm oui:text-gray-700">
+                            {pageIndex * pageSize + 1}-
+                            {Math.min((pageIndex + 1) * pageSize, fullyFilteredItems.length)} of{' '}
+                            {fullyFilteredItems.length}
+                          </span>
+                          <div className="oui:flex oui:gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPageIndex(pageIndex - 1)}
+                              disabled={pageIndex === 0}
+                              aria-label="Previous page"
+                            >
+                              ←
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPageIndex(pageIndex + 1)}
+                              disabled={(pageIndex + 1) * pageSize >= fullyFilteredItems.length}
+                              aria-label="Next page"
+                            >
+                              →
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
-  );
+              </div>
+            </div>
+          </div>
+        </div>
+      </OUI2Wrapper>
+    ) : (
+      <EuiPage data-test-subj="servicesPage">
+        <EuiPageBody component="main">
+          <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
+            <EuiPageContentBody>
+              {/* EUI fallback - keeping original structure */}
+              <FilterBar
+                items={services}
+                timeRange={timeRange}
+                onFilteredItems={handleFilteredItems}
+                onTimeChange={handleTimeChange}
+                onRefresh={handleRefresh}
+              />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup direction="row" gutterSize="s">
+                {filterDrawerOpen && (
+                  <EuiFlexItem grow={false}>
+                    <EuiPanel style={{ width: 250 }}>
+                      <p>EUI Fallback - filters not yet migrated</p>
+                    </EuiPanel>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <p>EUI Fallback - content not yet migrated</p>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
 };

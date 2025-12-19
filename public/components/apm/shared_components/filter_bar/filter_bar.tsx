@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PropertyFilter } from '../property_filter';
 import { TimeRangePicker } from '../time_filter';
 import { ServiceTableItem, TimeRange } from '../../services/types';
+import { USE_OUI_V2 } from '../../utils/config';
 
 export interface FilterBarProps {
   items: ServiceTableItem[];
@@ -34,7 +35,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onRefresh,
   isTimePickerDisabled = false,
 }) => {
-  return (
+  return USE_OUI_V2 ? (
+    <div className="oui:flex oui:items-center oui:gap-4" data-test-subj="apmFilterBar">
+      <div className="oui:flex-1">
+        <PropertyFilter items={items} onFilteredItems={onFilteredItems} />
+      </div>
+      <div className="oui:flex-shrink-0">
+        <TimeRangePicker
+          timeRange={timeRange}
+          onChange={onTimeChange}
+          onRefresh={onRefresh}
+          isDisabled={isTimePickerDisabled}
+        />
+      </div>
+    </div>
+  ) : (
     <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="apmFilterBar">
       <EuiFlexItem grow={true}>
         <PropertyFilter items={items} onFilteredItems={onFilteredItems} />

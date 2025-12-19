@@ -4,6 +4,7 @@
  */
 
 import { PluginInitializerContext } from '../../../src/core/public';
+import '@virajsanghvi/oui/dist/style.css';
 import './components/notebooks/index.scss';
 import './components/trace_analytics/index.scss';
 import { ObservabilityPlugin } from './plugin';

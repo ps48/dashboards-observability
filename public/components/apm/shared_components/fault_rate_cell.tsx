@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import React from 'react';
+import { Progress } from '@virajsanghvi/oui';
 
 export const getRelativePercentage = (fraction: number, fractionSum: number): number => {
   if (fractionSum <= 0) {
@@ -32,13 +32,11 @@ export const FaultRateCell: React.FC<FaultRateCellProps> = ({
   relativePercentage,
 }: FaultRateCellProps) => {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" style={{ maxWidth: '100%' }}>
-      <EuiFlexItem grow={false} style={{ width: '70px', textAlign: 'right' }}>
-        <EuiText size="s">{formatPercentage(faultRate)}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiProgress value={relativePercentage} max={100} size="l" color="primary" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div className="oui:space-y-1 oui:w-full">
+      <div className="oui:text-xs oui:font-medium">
+        {formatPercentage(faultRate)}
+      </div>
+      <Progress value={relativePercentage} className="oui:h-2 oui:w-full" />
+    </div>
   );
 };

@@ -25,3 +25,10 @@ export const RESOURCE_QUERY_INDEX_MAP: Record<string, string> = {
   'service-map': DEFAULT_SERVICE_MAP_INDEX,
   // metricData queries prometheus, no index needed
 };
+
+/**
+ * Feature flag for OUI 2.0 migration
+ * When true, APM components will render using OUI 2.0
+ * When false, APM components will use OUI 1.x (@elastic/eui alias)
+ */
+export const USE_OUI_V2 = true;

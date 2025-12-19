@@ -14,10 +14,14 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
 } from '@elastic/eui';
+import { Card, CardHeader, CardTitle, CardContent } from '@virajsanghvi/oui';
 import { useTopServicesByFaultRate } from '../utils/hooks/use_top_services_by_fault_rate';
 import { TimeRange } from '../services/types';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
+import { USE_OUI_V2 } from '../utils/config';
+import { TopFaultRateWidgetSkeleton } from './v2/widget_skeleton';
+import { OuiTable } from './v2/table';
 
 export interface TopServicesByFaultRateProps {
   timeRange: TimeRange;
@@ -82,8 +86,34 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
     }));
   }, [services]);
 
-  // Define table columns
-  const columns: Array<EuiBasicTableColumn<ServiceFaultRateItem>> = [
+  // Define table columns for EUI (fallback)
+  const euiColumns: Array<EuiBasicTableColumn<ServiceFaultRateItem>> = [
+    {
+      name: 'Service',
+      width: '40%',
+      truncateText: true,
+      render: (item: ServiceFaultRateItem) => (
+        <ServiceCell
+          service={item.serviceName}
+          environment={item.environment}
+          href={item.href}
+          onClick={
+            onServiceClick ? () => onServiceClick(item.serviceName, item.environment) : undefined
+          }
+        />
+      ),
+    },
+    {
+      name: 'Fault Rate',
+      width: '60%',
+      render: (item: ServiceFaultRateItem) => (
+        <FaultRateCell faultRate={item.faultRate} relativePercentage={item.relativePercentage} />
+      ),
+    },
+  ];
+
+  // Define table columns for OUI 2.0
+  const ouiColumns = [
     {
       name: 'Service',
       width: '40%',
@@ -109,7 +139,9 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
   ];
 
   if (isLoading) {
-    return (
+    return USE_OUI_V2 ? (
+      <TopFaultRateWidgetSkeleton rows={5} />
+    ) : (
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
@@ -131,7 +163,25 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
     const isAuthError =
       error.message.includes('Unauthorized') || error.message.includes('Authentication');
 
-    return (
+    return USE_OUI_V2 ? (
+      <Card className="oui:h-full">
+        <CardHeader>
+          <CardTitle>Top Services by Fault Rate</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="oui:text-sm oui:text-gray-600">
+            {isConfigError || isAuthError ? (
+              <>
+                Prometheus connection required. Configure a Prometheus data source to view fault
+                rate metrics.
+              </>
+            ) : (
+              <>Error loading fault rate data: {error.message}</>
+            )}
+          </p>
+        </CardContent>
+      </Card>
+    ) : (
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
@@ -154,7 +204,16 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
   }
 
   if (!services || services.length === 0) {
-    return (
+    return USE_OUI_V2 ? (
+      <Card className="oui:h-full">
+        <CardHeader>
+          <CardTitle>Top Services by Fault Rate</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="oui:text-sm oui:text-gray-600">No fault rate data available</p>
+        </CardContent>
+      </Card>
+    ) : (
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
@@ -169,14 +228,23 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
     );
   }
 
-  return (
+  return USE_OUI_V2 ? (
+    <Card className="oui:h-full">
+      <CardHeader>
+        <CardTitle>Top Services by Fault Rate</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <OuiTable items={tableItems} columns={ouiColumns} tableLayout="auto" />
+      </CardContent>
+    </Card>
+  ) : (
     <EuiFlexItem>
       <EuiPanel>
         <EuiText size="m">
           <h3>Top Services by Fault Rate</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
+        <EuiBasicTable items={tableItems} columns={euiColumns} tableLayout="auto" />
       </EuiPanel>
     </EuiFlexItem>
   );
