@@ -12,7 +12,6 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,6 +27,7 @@ import {
   EuiFieldSearch,
   EuiText,
   EuiHorizontalRule,
+  EuiResizableContainer,
 } from '@elastic/eui';
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 import { useServices } from '../../utils/hooks/use_services';
@@ -86,7 +86,6 @@ export const Services: React.FC<ApmServicesProps> = ({
   const [pageSize, setPageSize] = useState(20);
   const [sortField, setSortField] = useState<keyof ServiceTableItem>('serviceName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(true);
   const [actionPopoverId, setActionPopoverId] = useState<string | null>(null);
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
@@ -382,24 +381,6 @@ export const Services: React.FC<ApmServicesProps> = ({
     }
   }, []);
 
-  if (isLoading) {
-    return (
-      <EuiPage data-test-subj="servicesPage">
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 400 }}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="xl" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-
   if (error) {
     return (
       <EuiPage data-test-subj="servicesPage">
@@ -416,7 +397,7 @@ export const Services: React.FC<ApmServicesProps> = ({
     );
   }
 
-  if (!services || services.length === 0) {
+  if (!isLoading && (!services || services.length === 0)) {
     return (
       <EuiPage data-test-subj="servicesPage">
         <EuiPageBody>
@@ -450,267 +431,271 @@ export const Services: React.FC<ApmServicesProps> = ({
 
             <EuiSpacer size="s" />
 
-            {/* Main content with side drawer */}
-            <EuiFlexGroup direction="row" gutterSize="s">
-              {/* Left Side Drawer */}
-              <EuiFlexItem grow={false}>
-                {filterDrawerOpen ? (
-                  <EuiPanel style={{ width: 250 }}>
-                    <EuiFlexGroup
-                      justifyContent="spaceBetween"
-                      alignItems="center"
-                      gutterSize="none"
-                    >
-                      <EuiFlexItem grow={false}>
-                        <strong>Filters</strong>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          onClick={() => setFilterDrawerOpen(false)}
-                          iconType="menuLeft"
-                          iconSize="m"
-                          color="text"
-                          data-test-subj="filter-drawer-close"
-                          aria-label="Close filter drawer"
-                        />
-                      </EuiFlexItem>
+            {/* Main content with resizable filter sidebar */}
+            <EuiResizableContainer>
+              {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
+                <>
+                  {/* Left Side: Filter Sidebar - Collapsible */}
+                  <EuiResizablePanel
+                    mode={['custom', { position: 'top' }]}
+                    id="filter-sidebar"
+                    initialSize={20}
+                    minSize="10%"
+                    paddingSize="s"
+                  >
+                    <EuiPanel style={{ height: '100%' }}>
+                      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <strong>Filters</strong>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            color="text"
+                            aria-label="Toggle filter sidebar"
+                            iconType="menuLeft"
+                            onClick={() => togglePanel('filter-sidebar', { direction: 'left' })}
+                            data-test-subj="filter-sidebar-toggle"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+
+                      <EuiSpacer size="m" />
+                      <EuiHorizontalRule margin="none" />
+                      <EuiSpacer size="m" />
+
+                      {/* Environment Filter - Accordion */}
+                      <EuiAccordion
+                        id="environmentAccordion"
+                        buttonContent={
+                          <EuiText size="s">
+                            <strong>Environment</strong>
+                          </EuiText>
+                        }
+                        initialIsOpen={true}
+                        data-test-subj="environmentAccordion"
+                      >
+                        <EuiSpacer size="s" />
+
+                        {/* Select all / Clear all links */}
+                        {environmentCheckboxes.length > 0 && (
+                          <>
+                            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+                              <EuiFlexItem grow={false}>
+                                <EuiLink
+                                  onClick={handleSelectAllEnvironments}
+                                  data-test-subj="environment-selectAll"
+                                  color="primary"
+                                >
+                                  <EuiText size="xs">Select all</EuiText>
+                                </EuiLink>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiLink
+                                  onClick={handleClearAllEnvironments}
+                                  data-test-subj="environment-clearAll"
+                                  color="primary"
+                                >
+                                  <EuiText size="xs">Clear all</EuiText>
+                                </EuiLink>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                            <EuiSpacer size="s" />
+                          </>
+                        )}
+
+                        {/* Checkbox group */}
+                        {environmentCheckboxes.length > 0 ? (
+                          <EuiCheckboxGroup
+                            options={environmentCheckboxes}
+                            idToSelectedMap={selectedEnvironments}
+                            onChange={onEnvironmentChange}
+                            compressed
+                            data-test-subj="environment-checkboxGroup"
+                          />
+                        ) : (
+                          <EuiText size="s" color="subdued">
+                            No environments available
+                          </EuiText>
+                        )}
+                      </EuiAccordion>
+
+                      {/* Dynamic GroupByAttributes Filters - Accordion Structure */}
+                      {availableGroupByAttributes &&
+                        Object.keys(availableGroupByAttributes).length > 0 && (
+                          <>
+                            <EuiSpacer size="m" />
+                            <EuiAccordion
+                              id="attributesAccordion"
+                              buttonContent={
+                                <EuiText size="s">
+                                  <strong>Attributes</strong>
+                                </EuiText>
+                              }
+                              initialIsOpen={true}
+                              data-test-subj="attributesAccordion"
+                            >
+                              <EuiSpacer size="s" />
+
+                              {/* Inner accordions for each attribute */}
+                              {Object.entries(availableGroupByAttributes).map(
+                                ([attrPath, _values], index) => {
+                                  const filteredValues = filteredAttributeValues[attrPath] || [];
+                                  const searchQuery = attributeSearchQueries[attrPath] || '';
+
+                                  return (
+                                    <React.Fragment key={attrPath}>
+                                      {index > 0 && <EuiSpacer size="m" />}
+
+                                      <EuiAccordion
+                                        id={`attribute-${attrPath}-accordion`}
+                                        buttonContent={
+                                          <EuiText size="xs">
+                                            <strong>{attrPath}</strong>
+                                          </EuiText>
+                                        }
+                                        initialIsOpen={false}
+                                        data-test-subj={`attribute-${attrPath}-accordion`}
+                                      >
+                                        <EuiSpacer size="s" />
+
+                                        {/* Search box */}
+                                        <EuiFieldSearch
+                                          placeholder={`Search ${attrPath}`}
+                                          value={searchQuery}
+                                          onChange={(e) =>
+                                            handleSearchChange(attrPath, e.target.value)
+                                          }
+                                          isClearable
+                                          fullWidth
+                                          compressed
+                                          data-test-subj={`attribute-${attrPath}-search`}
+                                        />
+
+                                        <EuiSpacer size="s" />
+
+                                        {/* Select all / Clear all links */}
+                                        {filteredValues.length > 0 && (
+                                          <>
+                                            <EuiFlexGroup
+                                              gutterSize="s"
+                                              justifyContent="spaceBetween"
+                                            >
+                                              <EuiFlexItem grow={false}>
+                                                <EuiLink
+                                                  onClick={() =>
+                                                    handleSelectAllForAttribute(attrPath)
+                                                  }
+                                                  data-test-subj={`attribute-${attrPath}-selectAll`}
+                                                  color="primary"
+                                                >
+                                                  <EuiText size="xs">Select all</EuiText>
+                                                </EuiLink>
+                                              </EuiFlexItem>
+                                              <EuiFlexItem grow={false}>
+                                                <EuiLink
+                                                  onClick={() =>
+                                                    handleClearAllForAttribute(attrPath)
+                                                  }
+                                                  data-test-subj={`attribute-${attrPath}-clearAll`}
+                                                  color="primary"
+                                                >
+                                                  <EuiText size="xs">Clear all</EuiText>
+                                                </EuiLink>
+                                              </EuiFlexItem>
+                                            </EuiFlexGroup>
+                                            <EuiSpacer size="s" />
+                                          </>
+                                        )}
+
+                                        {/* Checkbox list */}
+                                        {filteredValues.length > 0 ? (
+                                          <EuiCheckboxGroup
+                                            options={filteredValues.map((value) => ({
+                                              id: value,
+                                              label: value,
+                                            }))}
+                                            idToSelectedMap={
+                                              selectedGroupByAttributes[attrPath] || {}
+                                            }
+                                            onChange={(id) => {
+                                              setSelectedGroupByAttributes((prev) => ({
+                                                ...prev,
+                                                [attrPath]: {
+                                                  ...(prev[attrPath] || {}),
+                                                  [id]: !prev[attrPath]?.[id],
+                                                },
+                                              }));
+                                            }}
+                                            compressed
+                                            data-test-subj={`attribute-${attrPath}-checkboxGroup`}
+                                          />
+                                        ) : (
+                                          <EuiText size="s" color="subdued">
+                                            No matching values
+                                          </EuiText>
+                                        )}
+                                      </EuiAccordion>
+                                    </React.Fragment>
+                                  );
+                                }
+                              )}
+                            </EuiAccordion>
+                          </>
+                        )}
+                    </EuiPanel>
+                  </EuiResizablePanel>
+
+                  <EuiResizableButton />
+
+                  {/* Right Side: Main Content */}
+                  <EuiResizablePanel
+                    id="main-content"
+                    initialSize={80}
+                    minSize="50%"
+                    paddingSize="s"
+                  >
+                    {/* Top Widgets Row */}
+                    <EuiFlexGroup gutterSize="s" direction="row" alignItems="stretch">
+                      <TopServicesByFaultRate
+                        timeRange={timeRange}
+                        prometheusConnectionId={effectivePrometheusConnection}
+                        onServiceClick={onServiceClick}
+                        refreshTrigger={refreshTrigger}
+                      />
+                      <TopDependenciesByFaultRate
+                        timeRange={timeRange}
+                        prometheusConnectionId={effectivePrometheusConnection}
+                        refreshTrigger={refreshTrigger}
+                        onServiceClick={onServiceClick}
+                      />
                     </EuiFlexGroup>
 
-                    <EuiSpacer size="m" />
-                    <EuiHorizontalRule margin="none" />
-                    <EuiSpacer size="m" />
+                    <EuiSpacer size="s" />
 
-                    {/* Environment Filter - Accordion */}
-                    <EuiAccordion
-                      id="environmentAccordion"
-                      buttonContent={
-                        <EuiText size="s">
-                          <strong>Environment</strong>
-                        </EuiText>
-                      }
-                      initialIsOpen={true}
-                      data-test-subj="environmentAccordion"
-                    >
-                      <EuiSpacer size="s" />
-
-                      {/* Select all / Clear all links */}
-                      {environmentCheckboxes.length > 0 && (
-                        <>
-                          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-                            <EuiFlexItem grow={false}>
-                              <EuiLink
-                                onClick={handleSelectAllEnvironments}
-                                data-test-subj="environment-selectAll"
-                                color="primary"
-                              >
-                                <EuiText size="xs">Select all</EuiText>
-                              </EuiLink>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiLink
-                                onClick={handleClearAllEnvironments}
-                                data-test-subj="environment-clearAll"
-                                color="primary"
-                              >
-                                <EuiText size="xs">Clear all</EuiText>
-                              </EuiLink>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                          <EuiSpacer size="s" />
-                        </>
-                      )}
-
-                      {/* Checkbox group */}
-                      {environmentCheckboxes.length > 0 ? (
-                        <EuiCheckboxGroup
-                          options={environmentCheckboxes}
-                          idToSelectedMap={selectedEnvironments}
-                          onChange={onEnvironmentChange}
-                          compressed
-                          data-test-subj="environment-checkboxGroup"
+                    {/* Services Table */}
+                    <EuiPanel>
+                      {fullyFilteredItems.length === 0 ? (
+                        <EmptyState
+                          title="No matching services"
+                          body="Try adjusting your search query or time range to find services."
+                          iconType="search"
                         />
                       ) : (
-                        <EuiText size="s" color="subdued">
-                          No environments available
-                        </EuiText>
+                        <EuiBasicTable
+                          items={fullyFilteredItems}
+                          columns={columns}
+                          sorting={sorting}
+                          pagination={pagination}
+                          onChange={onTableChange}
+                          loading={isLoading}
+                          data-test-subj="servicesTable"
+                        />
                       )}
-                    </EuiAccordion>
-
-                    {/* Dynamic GroupByAttributes Filters - Accordion Structure */}
-                    {availableGroupByAttributes &&
-                      Object.keys(availableGroupByAttributes).length > 0 && (
-                        <>
-                          <EuiSpacer size="m" />
-                          <EuiAccordion
-                            id="attributesAccordion"
-                            buttonContent={
-                              <EuiText size="s">
-                                <strong>Attributes</strong>
-                              </EuiText>
-                            }
-                            initialIsOpen={true}
-                            data-test-subj="attributesAccordion"
-                          >
-                            <EuiSpacer size="s" />
-
-                            {/* Inner accordions for each attribute */}
-                            {Object.entries(availableGroupByAttributes).map(
-                              ([attrPath, _values], index) => {
-                                const filteredValues = filteredAttributeValues[attrPath] || [];
-                                const searchQuery = attributeSearchQueries[attrPath] || '';
-
-                                return (
-                                  <React.Fragment key={attrPath}>
-                                    {index > 0 && <EuiSpacer size="m" />}
-
-                                    <EuiAccordion
-                                      id={`attribute-${attrPath}-accordion`}
-                                      buttonContent={
-                                        <EuiText size="xs">
-                                          <strong>{attrPath}</strong>
-                                        </EuiText>
-                                      }
-                                      initialIsOpen={false}
-                                      data-test-subj={`attribute-${attrPath}-accordion`}
-                                    >
-                                      <EuiSpacer size="s" />
-
-                                      {/* Search box */}
-                                      <EuiFieldSearch
-                                        placeholder={`Search ${attrPath}`}
-                                        value={searchQuery}
-                                        onChange={(e) =>
-                                          handleSearchChange(attrPath, e.target.value)
-                                        }
-                                        isClearable
-                                        fullWidth
-                                        compressed
-                                        data-test-subj={`attribute-${attrPath}-search`}
-                                      />
-
-                                      <EuiSpacer size="s" />
-
-                                      {/* Select all / Clear all links */}
-                                      {filteredValues.length > 0 && (
-                                        <>
-                                          <EuiFlexGroup
-                                            gutterSize="s"
-                                            justifyContent="spaceBetween"
-                                          >
-                                            <EuiFlexItem grow={false}>
-                                              <EuiLink
-                                                onClick={() =>
-                                                  handleSelectAllForAttribute(attrPath)
-                                                }
-                                                data-test-subj={`attribute-${attrPath}-selectAll`}
-                                                color="primary"
-                                              >
-                                                <EuiText size="xs">Select all</EuiText>
-                                              </EuiLink>
-                                            </EuiFlexItem>
-                                            <EuiFlexItem grow={false}>
-                                              <EuiLink
-                                                onClick={() => handleClearAllForAttribute(attrPath)}
-                                                data-test-subj={`attribute-${attrPath}-clearAll`}
-                                                color="primary"
-                                              >
-                                                <EuiText size="xs">Clear all</EuiText>
-                                              </EuiLink>
-                                            </EuiFlexItem>
-                                          </EuiFlexGroup>
-                                          <EuiSpacer size="s" />
-                                        </>
-                                      )}
-
-                                      {/* Checkbox list */}
-                                      {filteredValues.length > 0 ? (
-                                        <EuiCheckboxGroup
-                                          options={filteredValues.map((value) => ({
-                                            id: value,
-                                            label: value,
-                                          }))}
-                                          idToSelectedMap={
-                                            selectedGroupByAttributes[attrPath] || {}
-                                          }
-                                          onChange={(id) => {
-                                            setSelectedGroupByAttributes((prev) => ({
-                                              ...prev,
-                                              [attrPath]: {
-                                                ...(prev[attrPath] || {}),
-                                                [id]: !prev[attrPath]?.[id],
-                                              },
-                                            }));
-                                          }}
-                                          compressed
-                                          data-test-subj={`attribute-${attrPath}-checkboxGroup`}
-                                        />
-                                      ) : (
-                                        <EuiText size="s" color="subdued">
-                                          No matching values
-                                        </EuiText>
-                                      )}
-                                    </EuiAccordion>
-                                  </React.Fragment>
-                                );
-                              }
-                            )}
-                          </EuiAccordion>
-                        </>
-                      )}
-                  </EuiPanel>
-                ) : (
-                  <EuiPanel>
-                    <EuiButtonIcon
-                      onClick={() => setFilterDrawerOpen(true)}
-                      iconType="menuRight"
-                      iconSize="m"
-                      color="text"
-                      data-test-subj="filter-drawer-open"
-                      aria-label="Open filter drawer"
-                    />
-                  </EuiPanel>
-                )}
-              </EuiFlexItem>
-
-              {/* Right Main Content */}
-              <EuiFlexItem>
-                {/* Top Widgets Row */}
-                <EuiFlexGroup gutterSize="s" direction="row" alignItems="stretch">
-                  <TopServicesByFaultRate
-                    timeRange={timeRange}
-                    prometheusConnectionId={effectivePrometheusConnection}
-                    onServiceClick={onServiceClick}
-                    refreshTrigger={refreshTrigger}
-                  />
-                  <TopDependenciesByFaultRate
-                    timeRange={timeRange}
-                    prometheusConnectionId={effectivePrometheusConnection}
-                    refreshTrigger={refreshTrigger}
-                    onServiceClick={onServiceClick}
-                  />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="s" />
-
-                {/* Services Table */}
-                {fullyFilteredItems.length === 0 ? (
-                  <EmptyState
-                    title="No matching services"
-                    body="Try adjusting your search query or time range to find services."
-                    iconType="search"
-                  />
-                ) : (
-                  <EuiBasicTable
-                    items={fullyFilteredItems}
-                    columns={columns}
-                    sorting={sorting}
-                    pagination={pagination}
-                    onChange={onTableChange}
-                    data-test-subj="servicesTable"
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                    </EuiPanel>
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

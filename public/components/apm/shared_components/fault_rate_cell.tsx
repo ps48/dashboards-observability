@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React from 'react';
 
 export const getRelativePercentage = (fraction: number, fractionSum: number): number => {
@@ -33,11 +33,14 @@ export const FaultRateCell: React.FC<FaultRateCellProps> = ({
 }: FaultRateCellProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" style={{ maxWidth: '100%' }}>
-      <EuiFlexItem grow={false} style={{ width: '70px', textAlign: 'right' }}>
-        <EuiText size="s">{formatPercentage(faultRate)}</EuiText>
-      </EuiFlexItem>
       <EuiFlexItem>
-        <EuiProgress value={relativePercentage} max={100} size="l" color="primary" />
+        <EuiProgress
+          valueText={formatPercentage(faultRate)}
+          value={relativePercentage}
+          max={100}
+          size="m"
+          color="vis2"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

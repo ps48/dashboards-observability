@@ -202,9 +202,17 @@ export const useTopServicesByFaultRate = (
           }
         }
 
-        // Data is already sorted by PromQL topk()
-        console.log('[useTopServicesByFaultRate] Final services:', services);
-        setData(services.slice(0, fetchParams.limit));
+        // Sort by fault rate descending and filter out 0% rates
+        const sortedAndFiltered = services
+          .filter((service) => service.faultRate > 0)
+          .sort((a, b) => b.faultRate - a.faultRate)
+          .slice(0, fetchParams.limit);
+
+        console.log(
+          '[useTopServicesByFaultRate] Final services (sorted & filtered):',
+          sortedAndFiltered
+        );
+        setData(sortedAndFiltered);
       } catch (err) {
         console.error('[useTopServicesByFaultRate] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));

@@ -159,7 +159,7 @@ export const QUERY_TOP_SERVICES_BY_FAULT_RATE = `
 topk(5,
   sum by (environment, service) (fault)
   /
-  sum by (environment, service) (request)
+  sum by (environment, service) (request) * 100
 )
 `;
 

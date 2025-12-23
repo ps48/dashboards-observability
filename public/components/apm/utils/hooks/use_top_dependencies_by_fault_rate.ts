@@ -157,9 +157,17 @@ export const useTopDependenciesByFaultRate = (
           });
         }
 
-        // Data is already sorted by PromQL topk()
-        console.log('[useTopDependenciesByFaultRate] Final dependencies:', dependencies);
-        setData(dependencies.slice(0, fetchParams.limit));
+        // Sort by fault rate descending and filter out 0% rates
+        const sortedAndFiltered = dependencies
+          .filter((dep) => dep.faultRate > 0)
+          .sort((a, b) => b.faultRate - a.faultRate)
+          .slice(0, fetchParams.limit);
+
+        console.log(
+          '[useTopDependenciesByFaultRate] Final dependencies (sorted & filtered):',
+          sortedAndFiltered
+        );
+        setData(sortedAndFiltered);
       } catch (err) {
         console.error('[useTopDependenciesByFaultRate] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));

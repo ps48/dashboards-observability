@@ -204,11 +204,17 @@ export class ObservabilityPlugin
     this.mdsFlagStatus = !!setupDeps.dataSource;
 
     // Read APM enabled setting from GLOBAL scope - only honor if MDS is enabled
-    const apmSettingValue = await core.uiSettings.getUserProvidedWithScope(
-      APM_ENABLED_SETTING,
-      UiSettingScope.GLOBAL
-    );
-    this.apmEnabled = this.mdsFlagStatus && (apmSettingValue ?? true); // default to true if not set
+    try {
+      const apmSettingValue = await core.uiSettings.getUserProvidedWithScope(
+        APM_ENABLED_SETTING,
+        UiSettingScope.GLOBAL
+      );
+      this.apmEnabled = this.mdsFlagStatus && (apmSettingValue ?? false); // default to true if not set
+    } catch (error) {
+      // Handle authentication errors during setup (e.g., with workspaces enabled)
+      // Default to true (matches the setting's default value in register_settings.ts:149)
+      this.apmEnabled = this.mdsFlagStatus && false;
+    }
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {

@@ -49,29 +49,20 @@ export const ServiceCell: React.FC<ServiceCellProps> = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiToolTip content={serviceTooltipContent}>
-          {!href && !onClick ? (
-            <EuiText size="s">
-              <span style={ellipsisStyle}>{service}</span>
-            </EuiText>
-          ) : onClick ? (
-            <EuiLink onClick={handleClick} style={ellipsisStyle}>
-              {service}
-            </EuiLink>
-          ) : (
-            <EuiLink href={href} style={ellipsisStyle}>
-              {service}
-            </EuiLink>
-          )}
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="xs" color="subdued">
-          <span style={ellipsisStyle}>{environment}</span>
+    <EuiToolTip content={serviceTooltipContent}>
+      {!href && !onClick ? (
+        <EuiText size="s">
+          <span style={ellipsisStyle}>{service}</span>
         </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      ) : onClick ? (
+        <EuiLink onClick={handleClick} style={ellipsisStyle}>
+          {service}
+        </EuiLink>
+      ) : (
+        <EuiLink href={href} style={ellipsisStyle}>
+          {service}
+        </EuiLink>
+      )}
+    </EuiToolTip>
   );
 };

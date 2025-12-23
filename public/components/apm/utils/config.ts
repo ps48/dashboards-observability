@@ -4,11 +4,11 @@
  */
 
 // Data source ID references - actual credentials and endpoints are resolved server-side
-export const DEFAULT_PPL_DATA_SOURCE_ID = '6cfa38e0-d206-11f0-a7d0-65a8fe88d981';
+export const DEFAULT_PPL_DATA_SOURCE_ID = '88ecf710-dfd3-11f0-baff-5509258005bd';
 
 // Prometheus configuration
 // OpenSearch datasource ID routes to the correct OpenSearch cluster
-export const DEFAULT_OPENSEARCH_DATASOURCE_ID = '6cfa38e0-d206-11f0-a7d0-65a8fe88d981';
+export const DEFAULT_OPENSEARCH_DATASOURCE_ID = '88ecf710-dfd3-11f0-baff-5509258005bd';
 // Prometheus connection name identifies the Prometheus datasource within the SQL plugin
 export const DEFAULT_PROMETHEUS_CONNECTION_NAME = 'my-prom';
 

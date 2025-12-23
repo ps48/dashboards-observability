@@ -129,9 +129,9 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h3>Top Dependency Paths by Fault Rate</h3>
+            <h4>Top Dependency Paths by Fault Rate</h4>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 150 }}>
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="l" />
@@ -151,9 +151,9 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h3>Top Dependency Paths by Fault Rate</h3>
+            <h4>Top Dependency Paths by Fault Rate</h4>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {isConfigError || isAuthError ? (
               <p>
@@ -174,9 +174,9 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h3>Top Dependency Paths by Fault Rate</h3>
+            <h4>Top Dependency Paths by Fault Rate</h4>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             <p>No dependency fault rate data available</p>
           </EuiText>
@@ -189,9 +189,9 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     <EuiFlexItem>
       <EuiPanel>
         <EuiText size="m">
-          <h3>Top Dependency Paths by Fault Rate</h3>
+          <h4>Top Dependency Paths by Fault Rate</h4>
         </EuiText>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
       </EuiPanel>
     </EuiFlexItem>

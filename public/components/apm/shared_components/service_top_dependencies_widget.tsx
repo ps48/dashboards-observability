@@ -182,9 +182,9 @@ export const ServiceTopDependenciesWidget: React.FC<ServiceTopDependenciesWidget
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="s">
-          <h3>Top Dependencies by Fault Rate</h3>
+          <h4>Top Dependencies by Fault Rate</h4>
         </EuiText>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 100 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" />
@@ -198,9 +198,9 @@ export const ServiceTopDependenciesWidget: React.FC<ServiceTopDependenciesWidget
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="s">
-          <h3>Top Dependencies by Fault Rate</h3>
+          <h4>Top Dependencies by Fault Rate</h4>
         </EuiText>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
           <p>Error loading dependency data: {error.message}</p>
         </EuiText>
@@ -212,9 +212,9 @@ export const ServiceTopDependenciesWidget: React.FC<ServiceTopDependenciesWidget
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="s">
-          <h3>Top Dependencies by Fault Rate</h3>
+          <h4>Top Dependencies by Fault Rate</h4>
         </EuiText>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
           <p>No dependencies with faults found for this service</p>
         </EuiText>
@@ -225,9 +225,9 @@ export const ServiceTopDependenciesWidget: React.FC<ServiceTopDependenciesWidget
   return (
     <EuiPanel paddingSize="m">
       <EuiText size="s">
-        <h3>Top Dependencies by Fault Rate</h3>
+        <h4>Top Dependencies by Fault Rate</h4>
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
     </EuiPanel>
   );
