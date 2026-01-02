@@ -12,15 +12,13 @@ import {
   EuiTabs,
   EuiTab,
   EuiSpacer,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { ServiceOverview } from './service_overview';
 import { ServiceOperations } from './service_operations';
 import { ServiceDependencies } from './service_dependencies';
-import { TimeRangePicker } from '../../shared_components/time_filter';
+import { ApmPageHeader } from '../../shared_components/apm_page_header';
 import { TimeRange } from '../../services/types';
 import { DEFAULT_TOPOLOGY_INDEX, DEFAULT_PROMETHEUS_CONNECTION_NAME } from '../../utils/config';
-import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 
 export interface ServiceDetailsProps {
   serviceName: string;
@@ -173,17 +171,11 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       <EuiPageBody>
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
-            {/* Time picker in header */}
-            <HeaderControlledComponentsWrapper
-              components={[
-                <EuiFlexItem grow={false}>
-                  <TimeRangePicker
-                    timeRange={timeRange}
-                    onChange={handleTimeRangeChange}
-                    onRefresh={handleRefresh}
-                  />
-                </EuiFlexItem>,
-              ]}
+            {/* Time filter in page header */}
+            <ApmPageHeader
+              timeRange={timeRange}
+              onTimeChange={handleTimeRangeChange}
+              onRefresh={handleRefresh}
             />
 
             {/* Tabs */}

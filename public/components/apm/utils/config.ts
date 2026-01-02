@@ -25,3 +25,7 @@ export const RESOURCE_QUERY_INDEX_MAP: Record<string, string> = {
   'service-map': DEFAULT_SERVICE_MAP_INDEX,
   // metricData queries prometheus, no index needed
 };
+
+// Dataset index patterns for navigation to logs and traces
+export const DEFAULT_LOGS_DATASET = 'ss4o_logs-*-*';
+export const DEFAULT_TRACES_DATASET = 'ss4o_traces-*-*';

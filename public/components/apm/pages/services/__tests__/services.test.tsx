@@ -8,16 +8,14 @@ import { render, screen } from '@testing-library/react';
 
 // Mock hooks before imports
 jest.mock('../../../utils/hooks/use_services');
+jest.mock('../../../utils/hooks/use_services_red_metrics');
 
-// Mock FilterBar before imports
-jest.mock('../../../shared_components/filter_bar', () => {
+// Mock ApmPageHeader before imports
+jest.mock('../../../shared_components/apm_page_header', () => {
   const ReactMock = jest.requireActual('react');
   return {
-    FilterBar: ({ items, onFilteredItems }: any) => {
-      ReactMock.useEffect(() => {
-        onFilteredItems(items);
-      }, [items, onFilteredItems]);
-      return ReactMock.createElement('div', { 'data-test-subj': 'mockFilterBar' });
+    ApmPageHeader: () => {
+      return ReactMock.createElement('div', { 'data-test-subj': 'mockApmPageHeader' });
     },
   };
 });
@@ -54,10 +52,41 @@ jest.mock('../../../shared_components/top_services_by_fault_rate', () => {
   };
 });
 
+// Mock LanguageIcon
+jest.mock('../../../shared_components/language_icon', () => {
+  const ReactMock = jest.requireActual('react');
+  return {
+    LanguageIcon: () => {
+      return ReactMock.createElement('div', { 'data-test-subj': 'mockLanguageIcon' });
+    },
+  };
+});
+
+// Mock MetricSparkline
+jest.mock('../../../shared_components/metric_sparkline', () => {
+  const ReactMock = jest.requireActual('react');
+  return {
+    MetricSparkline: () => {
+      return ReactMock.createElement('div', { 'data-test-subj': 'mockMetricSparkline' });
+    },
+  };
+});
+
+// Mock navigation utilities
+jest.mock('../../../utils/navigation_utils', () => ({
+  navigateToServiceMap: jest.fn(),
+  navigateToServiceLogs: jest.fn(),
+  navigateToServiceTraces: jest.fn(),
+}));
+
 import { Services } from '../services';
 import { useServices } from '../../../utils/hooks/use_services';
+import { useServicesRedMetrics } from '../../../utils/hooks/use_services_red_metrics';
 
 const mockUseServices = useServices as jest.MockedFunction<typeof useServices>;
+const mockUseServicesRedMetrics = useServicesRedMetrics as jest.MockedFunction<
+  typeof useServicesRedMetrics
+>;
 
 describe('Services', () => {
   const defaultProps = {
@@ -73,6 +102,13 @@ describe('Services', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default mock for RED metrics hook
+    mockUseServicesRedMetrics.mockReturnValue({
+      metricsMap: new Map(),
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
   });
 
   it('should set breadcrumbs on mount', () => {
@@ -105,9 +141,8 @@ describe('Services', () => {
     render(<Services {...defaultProps} />);
 
     expect(screen.getByTestId('servicesPage')).toBeInTheDocument();
-    // EuiLoadingSpinner renders as a span with class, not with progressbar role
-    const spinner = document.querySelector('.euiLoadingSpinner');
-    expect(spinner).toBeInTheDocument();
+    // During loading, the full page structure is rendered with ApmPageHeader
+    expect(screen.getByTestId('mockApmPageHeader')).toBeInTheDocument();
   });
 
   it('should render error state', () => {
@@ -143,6 +178,9 @@ describe('Services', () => {
         serviceId: 'payment-service::production',
         serviceName: 'payment-service',
         environment: 'production',
+        groupByAttributes: {
+          'telemetry.sdk.language': 'java',
+        },
       },
     ];
 
@@ -151,12 +189,14 @@ describe('Services', () => {
       isLoading: false,
       error: null,
       refetch: jest.fn(),
+      availableGroupByAttributes: {},
     });
 
     render(<Services {...defaultProps} />);
 
     expect(screen.getByTestId('servicesPage')).toBeInTheDocument();
-    expect(screen.getByText('Services')).toBeInTheDocument();
+    // ApmPageHeader is now used for time filter instead of FilterBar
+    expect(screen.getByTestId('mockApmPageHeader')).toBeInTheDocument();
     expect(screen.getByTestId('servicesTable')).toBeInTheDocument();
     expect(screen.getByText('payment-service')).toBeInTheDocument();
   });

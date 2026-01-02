@@ -4,7 +4,7 @@
  */
 
 import { TimeRange } from '../services/types';
-import { DEFAULT_PPL_DATA_SOURCE_ID } from './config';
+import { DEFAULT_PPL_DATA_SOURCE_ID, DEFAULT_LOGS_DATASET, DEFAULT_TRACES_DATASET } from './config';
 import { DATA_PREPPER_INDEX_NAME } from '../../../../common/constants/trace_analytics';
 import { coreRefs } from '../../../framework/core_refs';
 
@@ -29,6 +29,87 @@ export function navigateToErrorTraces(serviceName: string, timeRange: TimeRange)
   // Build path using RISON-like format (OpenSearch Dashboards URL state format)
   // Format: _q=(dataset:(...),language:PPL,query:'...')&_g=(...)
   // Note: We only URL-encode the PPL query string content
+  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+    timeRange.from
+  },to:${
+    timeRange.to
+  }))&_q=(dataset:(dataSource:(id:'${dataSourceId}',title:os-3.3,type:OpenSearch,version:'3.3.0'),id:'${dataSourceId}::${INDEX_PATTERN_ID}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${indexPattern}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+    pplQuery
+  )}')`;
+
+  // Use navigateToApp to handle workspace context automatically
+  coreRefs.application?.navigateToApp(EXPLORE_APP_ID, { path });
+}
+
+/**
+ * Navigates to the service map view filtered by service
+ * TODO: Implement when topology/service map view is ready
+ *
+ * @param serviceName - The service to focus on
+ * @param environment - The environment to filter by
+ */
+export function navigateToServiceMap(serviceName: string, environment: string): void {
+  // TODO: Implement service map navigation when topology view is ready
+  console.log('[navigateToServiceMap] Navigation to service map:', { serviceName, environment });
+  // Placeholder - will navigate to application map/topology view
+}
+
+/**
+ * Navigates to the discover/logs page filtered by service
+ * Uses navigateToApp to automatically handle workspace context
+ *
+ * @param serviceName - The service to filter by
+ * @param environment - The environment to filter by
+ * @param timeRange - The time range for the query
+ */
+export function navigateToServiceLogs(
+  serviceName: string,
+  environment: string,
+  timeRange: TimeRange
+): void {
+  const dataSourceId = DEFAULT_PPL_DATA_SOURCE_ID;
+  const indexPattern = DEFAULT_LOGS_DATASET;
+
+  // Construct PPL query to filter by service name and environment
+  const pplQuery = `| where service.name = "${serviceName}"${
+    environment ? ` | where deployment.environment = "${environment}"` : ''
+  }`;
+
+  // Build path using RISON-like format (OpenSearch Dashboards URL state format)
+  const path = `logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+    timeRange.from
+  },to:${
+    timeRange.to
+  }))&_q=(dataset:(dataSource:(id:'${dataSourceId}',title:os-3.3,type:OpenSearch,version:'3.3.0'),id:'${dataSourceId}::${INDEX_PATTERN_ID}',schemaMappings:(),signalType:logs,timeFieldName:@timestamp,title:'${indexPattern}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+    pplQuery
+  )}')`;
+
+  // Use navigateToApp to handle workspace context automatically
+  coreRefs.application?.navigateToApp(EXPLORE_APP_ID, { path });
+}
+
+/**
+ * Navigates to the discover/traces page filtered by service
+ * Uses navigateToApp to automatically handle workspace context
+ *
+ * @param serviceName - The service to filter by
+ * @param environment - The environment to filter by
+ * @param timeRange - The time range for the query
+ */
+export function navigateToServiceTraces(
+  serviceName: string,
+  environment: string,
+  timeRange: TimeRange
+): void {
+  const dataSourceId = DEFAULT_PPL_DATA_SOURCE_ID;
+  const indexPattern = DEFAULT_TRACES_DATASET;
+
+  // Construct PPL query to filter by service name and environment
+  const pplQuery = `| where serviceName = "${serviceName}"${
+    environment ? ` | where environment = "${environment}"` : ''
+  }`;
+
+  // Build path using RISON-like format (OpenSearch Dashboards URL state format)
   const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
     timeRange.from
   },to:${

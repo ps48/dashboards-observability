@@ -387,8 +387,9 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
       }
     }
 
-    const serviceName = serviceKeyAttributes?.name;
-    const environmentType = serviceKeyAttributes?.environment;
+    // Handle both nested keyAttributes format and flat field format
+    const serviceName = serviceKeyAttributes?.name || row['service.name'];
+    const environmentType = serviceKeyAttributes?.environment || row.environment;
     const platformType = environmentType
       ? getPlatformTypeFromEnvironment(environmentType)
       : 'Generic';
@@ -513,8 +514,9 @@ export function transformGetServiceResponse(pplResponse: PPLDataFrame): any {
     }
   }
 
-  const serviceName = serviceKeyAttributes?.name;
-  const environmentType = serviceKeyAttributes?.environment;
+  // Handle both nested keyAttributes format and flat field format
+  const serviceName = serviceKeyAttributes?.name || row['service.name'];
+  const environmentType = serviceKeyAttributes?.environment || row.environment;
   const serviceType = serviceKeyAttributes?.type || 'Service';
 
   console.log(
@@ -813,8 +815,9 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
       }
     }
 
-    const serviceName = serviceKeyAttributes?.name;
-    const environmentType = serviceKeyAttributes?.environment;
+    // Handle both nested keyAttributes format and flat field format
+    const serviceName = serviceKeyAttributes?.name || row['service.name'];
+    const environmentType = serviceKeyAttributes?.environment || row.environment;
     const platformType = environmentType
       ? getPlatformTypeFromEnvironment(environmentType)
       : 'Generic';
@@ -989,10 +992,12 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
         }
       }
 
-      const serviceName = serviceKeyAttributes?.name;
-      const environmentType = serviceKeyAttributes?.environment;
-      const remoteServiceName = remoteServiceKeyAttributes?.name;
-      const remoteEnvironment = remoteServiceKeyAttributes?.environment;
+      // Handle both nested keyAttributes format and flat field format
+      const serviceName = serviceKeyAttributes?.name || row['service.name'];
+      const environmentType = serviceKeyAttributes?.environment || row.environment;
+      const remoteServiceName = remoteServiceKeyAttributes?.name || row['remoteService.name'];
+      const remoteEnvironment =
+        remoteServiceKeyAttributes?.environment || row['remoteService.environment'];
 
       if (!serviceName || !environmentType || !remoteServiceName || !remoteEnvironment) {
         console.log(`[DEBUG] Row ${index}: Missing required fields for edge`);

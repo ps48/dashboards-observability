@@ -9,7 +9,7 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiSpacer,
   EuiCallOut,
@@ -19,9 +19,7 @@ import {
   EuiBadge,
   EuiPanel,
   EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
+  EuiToolTip,
   EuiCheckboxGroup,
   EuiAccordion,
   EuiFieldSearch,
@@ -31,14 +29,22 @@ import {
 } from '@elastic/eui';
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 import { useServices } from '../../utils/hooks/use_services';
-import { FilterBar } from '../../shared_components/filter_bar';
+import { useServicesRedMetrics } from '../../utils/hooks/use_services_red_metrics';
+import { ApmPageHeader } from '../../shared_components/apm_page_header';
 import { EmptyState } from '../../shared_components/empty_state';
+import { LanguageIcon } from '../../shared_components/language_icon';
+import { MetricSparkline } from '../../shared_components/metric_sparkline';
 import { TopServicesByFaultRate } from '../../shared_components/top_services_by_fault_rate';
 import { TopDependenciesByFaultRate } from '../../shared_components/top_dependencies_by_fault_rate';
 import { TimeRange, ServiceTableItem } from '../../services/types';
 import { parseTimeRange } from '../../utils/time_utils';
 import { DEFAULT_TOPOLOGY_INDEX, DEFAULT_PROMETHEUS_CONNECTION_NAME } from '../../utils/config';
 import { parseEnvironmentType } from '../../utils/query_requests/response_processor';
+import {
+  navigateToServiceMap,
+  navigateToServiceLogs,
+  navigateToServiceTraces,
+} from '../../utils/navigation_utils';
 
 /**
  * Gets a nested value from an object using dot notation path
@@ -81,12 +87,6 @@ export const Services: React.FC<ApmServicesProps> = ({
     to: 'now',
   });
 
-  const [filteredItems, setFilteredItems] = useState<ServiceTableItem[]>([]);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [sortField, setSortField] = useState<keyof ServiceTableItem>('serviceName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [actionPopoverId, setActionPopoverId] = useState<string | null>(null);
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
     Record<string, Record<string, boolean>>
@@ -127,10 +127,6 @@ export const Services: React.FC<ApmServicesProps> = ({
     setRefreshTrigger((prev) => prev + 1);
     refetch();
   }, [refetch]);
-
-  const handleFilteredItems = useCallback((items: ServiceTableItem[]) => {
-    setFilteredItems(items);
-  }, []);
 
   // Filtered attribute values based on search queries
   const filteredAttributeValues = useMemo(() => {
@@ -212,9 +208,9 @@ export const Services: React.FC<ApmServicesProps> = ({
     }));
   }, []);
 
-  // Apply environment and groupByAttributes filtering on top of FilterBar filtering
+  // Apply environment and groupByAttributes filtering
   const fullyFilteredItems = useMemo(() => {
-    let filtered = [...filteredItems];
+    let filtered = [...(services || [])];
 
     // Filter by environment (platform type)
     const hasSelectedEnvironments = Object.values(selectedEnvironments).some((v) => v);
@@ -264,7 +260,18 @@ export const Services: React.FC<ApmServicesProps> = ({
     }
 
     return filtered;
-  }, [filteredItems, selectedEnvironments, selectedGroupByAttributes]);
+  }, [services, selectedEnvironments, selectedGroupByAttributes]);
+
+  // Fetch RED metrics for ALL filtered services (needed for sorting)
+  const { metricsMap, isLoading: metricsLoading } = useServicesRedMetrics({
+    services: fullyFilteredItems.map((s) => ({
+      serviceName: s.serviceName,
+      environment: s.environment,
+    })),
+    startTime: parsedTimeRange.startTime,
+    endTime: parsedTimeRange.endTime,
+    prometheusConnectionId: effectivePrometheusConnection,
+  });
 
   const columns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
     () => [
@@ -272,114 +279,206 @@ export const Services: React.FC<ApmServicesProps> = ({
         field: 'serviceName',
         name: 'Service Name',
         sortable: true,
-        width: '40%',
-        render: (serviceName: string, item: ServiceTableItem) => (
-          <EuiLink
-            onClick={() => {
-              if (onServiceClick) {
-                onServiceClick(serviceName, item.environment);
-              }
-            }}
-            data-test-subj={`serviceLink-${serviceName}`}
-          >
-            <strong>{serviceName}</strong>
-          </EuiLink>
-        ),
+        width: '25%',
+        render: (serviceName: string, item: ServiceTableItem) => {
+          const language = item.groupByAttributes?.telemetry?.sdk?.language;
+
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <LanguageIcon language={language} size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiLink
+                  onClick={() => {
+                    if (onServiceClick) {
+                      onServiceClick(serviceName, item.environment);
+                    }
+                  }}
+                  data-test-subj={`serviceLink-${serviceName}`}
+                >
+                  <strong>{serviceName}</strong>
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'environment',
         name: 'Environment',
         sortable: true,
-        width: '40%',
+        width: '15%',
         render: (environment: string) => {
           const color = environment === 'production' ? 'primary' : 'default';
           return <EuiBadge color={color}>{environment}</EuiBadge>;
         },
       },
       {
-        name: 'Actions',
+        field: 'latency' as any,
+        name: 'Latency (P95)',
         width: '10%',
-        render: (item: ServiceTableItem) => {
-          const itemKey = `${item.serviceName}::${item.environment}`;
-          const isPopoverOpen = actionPopoverId === itemKey;
-
-          const contextMenuItems = [
-            <EuiContextMenuItem
-              key="view"
-              icon="eye"
-              onClick={() => {
-                setActionPopoverId(null);
-                onServiceClick?.(item.serviceName, item.environment);
-              }}
-            >
-              View service details
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="traces"
-              icon="list"
-              onClick={() => {
-                setActionPopoverId(null);
-                // TODO: Navigate to traces for this service
-              }}
-            >
-              View traces
-            </EuiContextMenuItem>,
-          ];
+        sortable: (a: ServiceTableItem, b: ServiceTableItem) => {
+          const aMetrics = metricsMap.get(a.serviceName);
+          const bMetrics = metricsMap.get(b.serviceName);
+          const aLatency = aMetrics?.latency || [];
+          const bLatency = bMetrics?.latency || [];
+          const aValue = aLatency.length > 0 ? aLatency[aLatency.length - 1].value : 0;
+          const bValue = bLatency.length > 0 ? bLatency[bLatency.length - 1].value : 0;
+          return aValue - bValue;
+        },
+        align: 'center',
+        render: (_fieldValue: any, item: ServiceTableItem) => {
+          const metrics = metricsMap.get(item.serviceName);
+          const latencyData = metrics?.latency || [];
+          const latestValue =
+            latencyData.length > 0 ? latencyData[latencyData.length - 1].value : 0;
+          const latencyMs = (latestValue * 1000).toFixed(0);
 
           return (
-            <EuiPopover
-              button={
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  aria-label="Actions"
-                  onClick={() => setActionPopoverId(isPopoverOpen ? null : itemKey)}
-                  data-test-subj={`serviceActionsButton-${item.serviceName}`}
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false} style={{ minWidth: '60px' }}>
+                <EuiText size="s">{latencyMs} ms</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <MetricSparkline
+                  data={latencyData}
+                  isLoading={metricsLoading}
+                  color="#6092C0"
+                  height={20}
                 />
-              }
-              isOpen={isPopoverOpen}
-              closePopover={() => setActionPopoverId(null)}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel items={contextMenuItems} />
-            </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
-    ],
-    [onServiceClick, actionPopoverId]
-  );
+      {
+        field: 'throughput' as any,
+        name: 'Throughput',
+        width: '10%',
+        sortable: (a: ServiceTableItem, b: ServiceTableItem) => {
+          const aMetrics = metricsMap.get(a.serviceName);
+          const bMetrics = metricsMap.get(b.serviceName);
+          const aThroughput = aMetrics?.throughput || [];
+          const bThroughput = bMetrics?.throughput || [];
+          const aValue = aThroughput.length > 0 ? aThroughput[aThroughput.length - 1].value : 0;
+          const bValue = bThroughput.length > 0 ? bThroughput[bThroughput.length - 1].value : 0;
+          return aValue - bValue;
+        },
+        align: 'center',
+        render: (_fieldValue: any, item: ServiceTableItem) => {
+          const metrics = metricsMap.get(item.serviceName);
+          const throughputData = metrics?.throughput || [];
+          const latestValue =
+            throughputData.length > 0 ? throughputData[throughputData.length - 1].value : 0;
+          const throughputFormatted = latestValue.toFixed(0);
 
-  const sorting = useMemo(
-    () => ({
-      sort: {
-        field: sortField,
-        direction: sortDirection,
+          return (
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
+                <EuiText size="s">{throughputFormatted} req/m</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <MetricSparkline
+                  data={throughputData}
+                  isLoading={metricsLoading}
+                  color="#54B399"
+                  height={20}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
-    }),
-    [sortField, sortDirection]
-  );
+      {
+        field: 'failureRatio' as any,
+        name: 'Failure Ratio',
+        width: '10%',
+        sortable: (a: ServiceTableItem, b: ServiceTableItem) => {
+          const aMetrics = metricsMap.get(a.serviceName);
+          const bMetrics = metricsMap.get(b.serviceName);
+          const aFailure = aMetrics?.failureRatio || [];
+          const bFailure = bMetrics?.failureRatio || [];
+          const aValue = aFailure.length > 0 ? aFailure[aFailure.length - 1].value : 0;
+          const bValue = bFailure.length > 0 ? bFailure[bFailure.length - 1].value : 0;
+          return aValue - bValue;
+        },
+        align: 'center',
+        render: (_fieldValue: any, item: ServiceTableItem) => {
+          const metrics = metricsMap.get(item.serviceName);
+          const failureData = metrics?.failureRatio || [];
+          const latestValue =
+            failureData.length > 0 ? failureData[failureData.length - 1].value : 0;
+          const failureFormatted = latestValue.toFixed(1);
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount: fullyFilteredItems.length,
-      pageSizeOptions: [10, 20, 50, 100],
-    }),
-    [pageIndex, pageSize, fullyFilteredItems.length]
+          return (
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
+                <EuiText size="s">{failureFormatted}%</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <MetricSparkline
+                  data={failureData}
+                  isLoading={metricsLoading}
+                  color="#D36086"
+                  height={20}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
+      },
+      {
+        name: 'Actions',
+        width: '15%',
+        align: 'center',
+        render: (item: ServiceTableItem) => (
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="View service map">
+                <EuiButtonIcon
+                  iconType="graphApp"
+                  aria-label="View service map"
+                  onClick={() => navigateToServiceMap(item.serviceName, item.environment)}
+                  data-test-subj={`serviceMapButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="View logs">
+                <EuiButtonIcon
+                  iconType="discoverApp"
+                  aria-label="View logs"
+                  onClick={() =>
+                    navigateToServiceLogs(item.serviceName, item.environment, timeRange)
+                  }
+                  data-test-subj={`serviceLogsButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="View traces">
+                <EuiButtonIcon
+                  iconType="apmTrace"
+                  aria-label="View traces"
+                  onClick={() =>
+                    navigateToServiceTraces(item.serviceName, item.environment, timeRange)
+                  }
+                  data-test-subj={`serviceTracesButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+    ],
+    [onServiceClick, metricsMap, metricsLoading, timeRange]
   );
-
-  const onTableChange = useCallback(({ page, sort }: any) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
-    if (sort) {
-      setSortField(sort.field);
-      setSortDirection(sort.direction);
-    }
-  }, []);
 
   if (error) {
     return (
@@ -420,16 +519,12 @@ export const Services: React.FC<ApmServicesProps> = ({
       <EuiPageBody component="main">
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
-            {/* Top Filter Bar */}
-            <FilterBar
-              items={services}
+            {/* Time filter in page header */}
+            <ApmPageHeader
               timeRange={timeRange}
-              onFilteredItems={handleFilteredItems}
               onTimeChange={handleTimeChange}
               onRefresh={handleRefresh}
             />
-
-            <EuiSpacer size="s" />
 
             {/* Main content with resizable filter sidebar */}
             <EuiResizableContainer>
@@ -439,7 +534,7 @@ export const Services: React.FC<ApmServicesProps> = ({
                   <EuiResizablePanel
                     mode={['custom', { position: 'top' }]}
                     id="filter-sidebar"
-                    initialSize={20}
+                    initialSize={15}
                     minSize="10%"
                     paddingSize="s"
                   >
@@ -650,7 +745,7 @@ export const Services: React.FC<ApmServicesProps> = ({
                   {/* Right Side: Main Content */}
                   <EuiResizablePanel
                     id="main-content"
-                    initialSize={80}
+                    initialSize={85}
                     minSize="50%"
                     paddingSize="s"
                   >
@@ -681,12 +776,19 @@ export const Services: React.FC<ApmServicesProps> = ({
                           iconType="search"
                         />
                       ) : (
-                        <EuiBasicTable
+                        <EuiInMemoryTable
                           items={fullyFilteredItems}
                           columns={columns}
-                          sorting={sorting}
-                          pagination={pagination}
-                          onChange={onTableChange}
+                          pagination={{
+                            initialPageSize: 10,
+                            pageSizeOptions: [10, 20, 50, 100],
+                          }}
+                          sorting={{
+                            sort: {
+                              field: 'serviceName',
+                              direction: 'asc',
+                            },
+                          }}
                           loading={isLoading}
                           data-test-subj="servicesTable"
                         />
