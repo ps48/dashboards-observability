@@ -28,7 +28,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChromeBreadcrumb, CoreStart } from '../../../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
@@ -61,6 +62,14 @@ export interface ServicesHomeProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   onServiceClick?: (serviceName: string, environment: string) => void;
+  coreStart: CoreStart;
+  dataService: DataPublicPluginStart;
+}
+
+interface FlyoutState {
+  serviceName: string;
+  environment: string;
+  tab: 'spans' | 'logs';
 }
 
 interface FlyoutState {
@@ -82,6 +91,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   chrome,
   parentBreadcrumb,
   onServiceClick,
+  coreStart,
+  dataService,
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
@@ -640,6 +651,62 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         render: (environment: string) => {
           return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
         },
+      },
+      {
+        name: i18nTexts.table.actions,
+        width: '7%',
+        align: 'center',
+        render: (item: ServiceTableItem) => (
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
+                <EuiButtonIcon
+                  iconType="graphApp"
+                  aria-label={i18nTexts.actions.viewServiceMap}
+                  onClick={() => navigateToServiceMap(item.serviceName, item.environment)}
+                  data-test-subj={`serviceMapButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewLogs}>
+                <EuiButtonIcon
+                  iconType="discoverApp"
+                  aria-label={i18nTexts.actions.viewLogs}
+                  onClick={() =>
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      tab: 'logs',
+                    })
+                  }
+                  data-test-subj={`serviceLogsButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                <EuiButtonIcon
+                  iconType="apmTrace"
+                  aria-label={i18nTexts.actions.viewSpans}
+                  onClick={() =>
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      tab: 'spans',
+                    })
+                  }
+                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
       },
     ],
     [onServiceClick, metricsMap, metricsLoading]
