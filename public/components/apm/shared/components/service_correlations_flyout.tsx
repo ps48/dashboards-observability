@@ -43,7 +43,7 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
 } from '../utils/navigation_utils';
-import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
+import { getEnvironmentDisplayName } from '../../common/constants';
 import { uiSettingsService } from '../../../../../common/utils';
 import { SpanData, LogData, LogDatasetResult } from '../types/correlations_types';
 import { LanguageIcon } from './language_icon';
@@ -54,31 +54,7 @@ import {
   getLogLevelColor,
   getHttpStatusColor,
   normalizeLogLevel,
-  sanitizeQueryValue,
 } from '../utils/format_utils';
-
-/**
- * Creates a toggle handler for expanding/collapsing table rows with raw JSON data.
- */
-const createToggleRowHandler = (
-  setExpandedRows: React.Dispatch<React.SetStateAction<Record<string, React.ReactNode>>>
-) => (id: string, rawData: Record<string, any>) => {
-  setExpandedRows((prev) => {
-    const newExpanded = { ...prev };
-    if (newExpanded[id]) {
-      delete newExpanded[id];
-    } else {
-      newExpanded[id] = (
-        <div style={{ width: '100%' }}>
-          <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
-            {JSON.stringify(rawData, null, 2)}
-          </EuiCodeBlock>
-        </div>
-      );
-    }
-    return newExpanded;
-  });
-};
 
 interface ServiceCorrelationsFlyoutProps {
   serviceName: string;
@@ -254,9 +230,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             : undefined,
         };
 
-        const pplQuery = `source=${dataset.title} | where serviceName = '${sanitizeQueryValue(
-          serviceName
-        )}' | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
+        const pplQuery = `source=${dataset.title} | where serviceName = '${serviceName}' | sort - startTime | head 50`;
         const response = await pplService.executeQuery(pplQuery, dataset);
 
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -293,21 +267,27 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     }
 
     const fetchLogsForDatasets = async () => {
-      // Initialize results with loading state
-      const initialResults: LogDatasetResult[] = correlatedLogDatasets.map((dataset) => ({
-        datasetId: dataset.id,
-        displayName: dataset.displayName,
-        title: dataset.title,
-        serviceNameField: dataset.schemaMappings?.serviceName || '',
-        logs: [],
-        loading: true,
-      }));
-      setLogResults(initialResults);
+      const results: LogDatasetResult[] = [];
 
-      // Fetch logs for all datasets in parallel
+      for (const dataset of correlatedLogDatasets) {
+        const result: LogDatasetResult = {
+          datasetId: dataset.id,
+          displayName: dataset.displayName,
+          title: dataset.title,
+          serviceNameField: dataset.schemaMappings?.serviceName || '',
+          logs: [],
+          loading: true,
+        };
+        results.push(result);
+      }
+      setLogResults([...results]);
+
+      // Fetch logs for each dataset
       const pplService = new PPLSearchService();
 
-      const fetchPromises = correlatedLogDatasets.map(async (dataset, index) => {
+      for (let i = 0; i < correlatedLogDatasets.length; i++) {
+        const dataset = correlatedLogDatasets[i];
+
         // Validate schema mappings exist with required fields
         if (!dataset.schemaMappings?.serviceName || !dataset.schemaMappings?.timestamp) {
           coreRefs.toasts?.addDanger({
@@ -315,14 +295,13 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             text:
               'The log dataset is missing required schema mappings (serviceName, timestamp). Please configure the dataset properly.',
           });
-          return {
-            index,
-            result: {
-              ...initialResults[index],
-              loading: false,
-              error: new Error('Missing schema mappings'),
-            },
+          results[i] = {
+            ...results[i],
+            loading: false,
+            error: new Error('Missing schema mappings'),
           };
+          setLogResults([...results]);
+          continue;
         }
 
         const serviceNameField = dataset.schemaMappings.serviceName;
@@ -335,11 +314,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           };
 
           // Use backticks for field names with dots
-          const pplQuery = `source=${
-            dataset.title
-          } | where \`${serviceNameField}\` = '${sanitizeQueryValue(
-            serviceName
-          )}' | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET}`;
+          const pplQuery = `source=${dataset.title} | where \`${serviceNameField}\` = '${serviceName}' | sort - \`${timestampField}\` | head 10`;
           const response = await pplService.executeQuery(pplQuery, datasetConfig);
 
           const logsData: LogData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -352,41 +327,62 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             raw: item,
           }));
 
-          return {
-            index,
-            result: {
-              ...initialResults[index],
-              logs: logsData,
-              loading: false,
-            },
+          results[i] = {
+            ...results[i],
+            logs: logsData,
+            loading: false,
           };
         } catch (err) {
-          return {
-            index,
-            result: {
-              ...initialResults[index],
-              loading: false,
-              error: err instanceof Error ? err : new Error(String(err)),
-            },
+          results[i] = {
+            ...results[i],
+            loading: false,
+            error: err instanceof Error ? err : new Error(String(err)),
           };
         }
-      });
-
-      // Wait for all fetches to complete and update state once
-      const fetchedResults = await Promise.all(fetchPromises);
-      const finalResults = [...initialResults];
-      fetchedResults.forEach(({ index, result }) => {
-        finalResults[index] = result;
-      });
-      setLogResults(finalResults);
+        setLogResults([...results]);
+      }
     };
 
     fetchLogsForDatasets();
   }, [correlatedLogDatasets, serviceName]);
 
-  // Toggle row expansion handlers using shared factory function
-  const toggleSpanRow = createToggleRowHandler(setExpandedSpanRows);
-  const toggleLogRow = createToggleRowHandler(setExpandedLogRows);
+  // Toggle span row expansion
+  const toggleSpanRow = (spanId: string, rawData: Record<string, any>) => {
+    setExpandedSpanRows((prev) => {
+      const newExpanded = { ...prev };
+      if (newExpanded[spanId]) {
+        delete newExpanded[spanId];
+      } else {
+        newExpanded[spanId] = (
+          <div style={{ width: '100%' }}>
+            <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
+              {JSON.stringify(rawData, null, 2)}
+            </EuiCodeBlock>
+          </div>
+        );
+      }
+      return newExpanded;
+    });
+  };
+
+  // Toggle log row expansion
+  const toggleLogRow = (logId: string, rawData: Record<string, any>) => {
+    setExpandedLogRows((prev) => {
+      const newExpanded = { ...prev };
+      if (newExpanded[logId]) {
+        delete newExpanded[logId];
+      } else {
+        newExpanded[logId] = (
+          <div style={{ width: '100%' }}>
+            <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
+              {JSON.stringify(rawData, null, 2)}
+            </EuiCodeBlock>
+          </div>
+        );
+      }
+      return newExpanded;
+    });
+  };
 
   // Spans table columns
   const spanColumns: Array<EuiBasicTableColumn<SpanData>> = [
@@ -515,11 +511,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       sortable: true,
       render: (message: string) => (
         <EuiText size="xs" style={{ wordBreak: 'break-word' }}>
-          {message
-            ? message.length > APM_CONSTANTS.MESSAGE_TRUNCATION_LENGTH
-              ? message.substring(0, APM_CONSTANTS.MESSAGE_TRUNCATION_LENGTH) + '...'
-              : message
-            : '-'}
+          {message ? (message.length > 200 ? message.substring(0, 200) + '...' : message) : '-'}
         </EuiText>
       ),
     },

@@ -28,8 +28,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
@@ -62,14 +61,6 @@ export interface ServicesHomeProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   onServiceClick?: (serviceName: string, environment: string) => void;
-  coreStart: CoreStart;
-  dataService: DataPublicPluginStart;
-}
-
-interface FlyoutState {
-  serviceName: string;
-  environment: string;
-  tab: 'spans' | 'logs';
 }
 
 interface FlyoutState {
@@ -91,8 +82,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   chrome,
   parentBreadcrumb,
   onServiceClick,
-  coreStart,
-  dataService,
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
