@@ -18,6 +18,7 @@ import { i18n } from '@osd/i18n';
 import { TimeRange } from '../../common/types/service_details_types';
 import { PromQLMetricCard } from '../../shared/components/promql_metric_card';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
+import { ChartErrorBoundary } from '../../shared/components/chart_error_boundary';
 import { ServiceDependenciesByFaultRate } from '../../shared/components/fault_widgets/service_dependencies_by_fault_rate';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
 import './service_overview.scss';
@@ -337,18 +338,20 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <PromQLLineChart
-              promqlQuery={getQueryTopDependenciesByLatency(
-                environment,
-                serviceName,
-                latencyPercentileValue
-              )}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              formatValue={formatLatency}
-              refreshTrigger={refreshTrigger}
-              labelField="remoteService"
-            />
+            <ChartErrorBoundary>
+              <PromQLLineChart
+                promqlQuery={getQueryTopDependenciesByLatency(
+                  environment,
+                  serviceName,
+                  latencyPercentileValue
+                )}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                formatValue={formatLatency}
+                refreshTrigger={refreshTrigger}
+                labelField="remoteService"
+              />
+            </ChartErrorBoundary>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -407,14 +410,16 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <PromQLLineChart
-              promqlQuery={getQueryTopOperationsByVolume(environment, serviceName, requestsTopK)}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              formatValue={formatCount}
-              refreshTrigger={refreshTrigger}
-              labelField="operation"
-            />
+            <ChartErrorBoundary>
+              <PromQLLineChart
+                promqlQuery={getQueryTopOperationsByVolume(environment, serviceName, requestsTopK)}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                formatValue={formatCount}
+                refreshTrigger={refreshTrigger}
+                labelField="operation"
+              />
+            </ChartErrorBoundary>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -467,19 +472,21 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <PromQLLineChart
-              promqlQuery={getQueryServiceAvailabilityByOperations(
-                environment,
-                serviceName,
-                availabilityBottomK
-              )}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              formatValue={formatPercentage}
-              formatTooltipValue={formatPercentageValue}
-              refreshTrigger={refreshTrigger}
-              labelField="operation"
-            />
+            <ChartErrorBoundary>
+              <PromQLLineChart
+                promqlQuery={getQueryServiceAvailabilityByOperations(
+                  environment,
+                  serviceName,
+                  availabilityBottomK
+                )}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                formatValue={formatPercentage}
+                formatTooltipValue={formatPercentageValue}
+                refreshTrigger={refreshTrigger}
+                labelField="operation"
+              />
+            </ChartErrorBoundary>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -538,15 +545,17 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <PromQLLineChart
-              promqlQuery={getQueryServiceFaultRate(environment, serviceName, faultRateTopK)}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              formatValue={formatPercentage}
-              formatTooltipValue={formatPercentageValue}
-              refreshTrigger={refreshTrigger}
-              labelField="operation"
-            />
+            <ChartErrorBoundary>
+              <PromQLLineChart
+                promqlQuery={getQueryServiceFaultRate(environment, serviceName, faultRateTopK)}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                formatValue={formatPercentage}
+                formatTooltipValue={formatPercentageValue}
+                refreshTrigger={refreshTrigger}
+                labelField="operation"
+              />
+            </ChartErrorBoundary>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -599,19 +608,21 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <PromQLLineChart
-              promqlQuery={getQueryServiceErrorRateOverTime(
-                environment,
-                serviceName,
-                errorRateTopK
-              )}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              formatValue={formatPercentage}
-              formatTooltipValue={formatPercentageValue}
-              refreshTrigger={refreshTrigger}
-              labelField="operation"
-            />
+            <ChartErrorBoundary>
+              <PromQLLineChart
+                promqlQuery={getQueryServiceErrorRateOverTime(
+                  environment,
+                  serviceName,
+                  errorRateTopK
+                )}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                formatValue={formatPercentage}
+                formatTooltipValue={formatPercentageValue}
+                refreshTrigger={refreshTrigger}
+                labelField="operation"
+              />
+            </ChartErrorBoundary>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

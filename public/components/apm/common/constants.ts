@@ -29,7 +29,7 @@ export const APM_CONSTANTS = {
 
   // Table pagination
   DEFAULT_PAGE_SIZE: 10,
-  PAGE_SIZE_OPTIONS: [10, 20, 50, 100] as const,
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
 
   // Sparklines
   SPARKLINE_HEIGHT: 20,
@@ -142,6 +142,10 @@ export const SERVICE_DETAILS_CONSTANTS = {
     TO: 'to',
     FILTER_PREFIX: 'filter.',
   } as const,
+
+  // Table pagination
+  DEFAULT_PAGE_SIZE: 10,
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as readonly number[],
 } as const;
 
 /**

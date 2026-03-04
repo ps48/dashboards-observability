@@ -18,7 +18,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiButtonIcon,
-  EuiButtonGroup,
   EuiToolTip,
   EuiCheckboxGroup,
   EuiAccordion,
@@ -26,7 +25,6 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiResizableContainer,
-  EuiIcon,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
@@ -35,7 +33,6 @@ import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metri
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
 import { EmptyState } from '../../shared/components/empty_state';
 import { LanguageIcon } from '../../shared/components/language_icon';
-import { MetricSparkline } from '../../shared/components/metric_sparkline';
 import { TopServicesByFaultRate } from '../../shared/components/fault_widgets/top_services_by_fault_rate';
 import { TopDependenciesByFaultRate } from '../../shared/components/fault_widgets/top_dependencies_by_fault_rate';
 import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
@@ -55,16 +52,11 @@ import {
   THRESHOLD_LABELS,
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
-import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
+import { APM_CONSTANTS } from '../../common/constants';
+import { useTablePagination } from '../../shared/hooks/use_table_pagination';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
 import '../../shared/styles/apm_common.scss';
-
-const LATENCY_PERCENTILE_OPTIONS = [
-  { id: 'p99', label: 'P99' },
-  { id: 'p90', label: 'P90' },
-  { id: 'p50', label: 'P50' },
-];
 
 export interface ServicesHomeProps {
   chrome: any;
@@ -120,9 +112,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [selectedFailureRateThresholds, setSelectedFailureRateThresholds] = useState<
     ErrorRateThreshold[]
   >([]);
-
-  // Latency percentile selector state
-  const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
   // Set breadcrumbs
   React.useEffect(() => {
@@ -291,7 +280,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     })),
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
-    latencyPercentile,
+    latencyPercentile: 'p99',
   });
 
   const handleRefresh = useCallback(() => {
@@ -419,6 +408,16 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     selectedFailureRateThresholds,
   ]);
 
+  // Controlled pagination with mousedown workaround for broken page-number clicks
+  const { pagination, onTableChange, resetPage, tableRef } = useTablePagination(
+    displayedServices.length
+  );
+
+  // Reset page when filter criteria change
+  useEffect(() => {
+    resetPage();
+  }, [fullyFilteredItems, latencyRange, throughputRange, selectedFailureRateThresholds, resetPage]);
+
   // Build active filter badges from current filter state
   const activeFilters: FilterBadge[] = useMemo(() => {
     const badges: FilterBadge[] = [];
@@ -520,7 +519,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'serviceName',
         name: i18nTexts.table.serviceName,
         sortable: true,
-        width: '20%',
         render: (serviceName: string, item: ServiceTableItem) => {
           const language = item.groupByAttributes?.telemetry?.sdk?.language;
 
@@ -546,12 +544,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         },
       },
       {
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.actions}</EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        width: '10%',
+        name: i18nTexts.table.actions,
+        width: '150px',
         align: 'center',
         render: (item: ServiceTableItem) => (
           <EuiFlexGroup
@@ -610,172 +604,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           </EuiFlexGroup>
         ),
       },
-      {
-        field: 'latency' as any,
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem
-              grow={false}
-            >{`Avg. Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.tableTooltips.latency}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        width: '21%',
-        align: 'center',
-        sortable: (item: ServiceTableItem) => {
-          if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
-          return metrics?.avgLatency || 0;
-        },
-        render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
-          const latencyData = metrics?.latency || [];
-          // Use average latency over the time period
-          const avgLatency = metrics?.avgLatency || 0;
-          const latencyMs = avgLatency.toFixed(0);
-
-          return (
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="xs"
-              justifyContent="center"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false} style={{ minWidth: '60px' }}>
-                <EuiText size="s">{latencyMs} ms</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <MetricSparkline
-                  data={latencyData}
-                  isLoading={metricsLoading}
-                  color={APM_CONSTANTS.COLORS.LATENCY}
-                  height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        field: 'throughput' as any,
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.throughput}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.tableTooltips.throughput}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        width: '21%',
-        align: 'center',
-        sortable: (item: ServiceTableItem) => {
-          if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
-          // Sort by average throughput over the time period
-          return metrics?.avgThroughput || 0;
-        },
-        render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
-          const throughputData = metrics?.throughput || [];
-          // Display average throughput over the time period
-          const avgThroughput = metrics?.avgThroughput || 0;
-          const throughputFormatted = formatThroughput(avgThroughput);
-
-          return (
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="xs"
-              justifyContent="center"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false} style={{ minWidth: '90px' }}>
-                <EuiText size="s">{throughputFormatted}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <MetricSparkline
-                  data={throughputData}
-                  isLoading={metricsLoading}
-                  color={APM_CONSTANTS.COLORS.THROUGHPUT}
-                  height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        field: 'failureRatio' as any,
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.failureRatio}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.tableTooltips.failureRatio}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        width: '100px',
-        align: 'center',
-        sortable: (item: ServiceTableItem) => {
-          if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
-          return metrics?.avgFailureRatio || 0;
-        },
-        render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
-          const failureData = metrics?.failureRatio || [];
-          // Use average failure ratio over the time period
-          const avgFailureRatio = metrics?.avgFailureRatio || 0;
-          const failureFormatted = avgFailureRatio.toFixed(1);
-
-          return (
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="xs"
-              justifyContent="center"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
-                <EuiText size="s">{failureFormatted}%</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <MetricSparkline
-                  data={failureData}
-                  isLoading={metricsLoading}
-                  color={APM_CONSTANTS.COLORS.FAILURE_RATE}
-                  height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        field: 'environment',
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.environment}</EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        sortable: true,
-        align: 'center',
-        width: '10%',
-        render: (environment: string) => {
-          return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
-        },
-      },
     ],
-    [onServiceClick, metricsMap, metricsLoading, timeRange, latencyPercentile]
+    [onServiceClick, timeRange]
   );
 
   if (error) {
@@ -832,7 +662,20 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 />
               </EuiPanel>
             ) : (
-              /* Main content with resizable filter sidebar */
+              <>
+              {/* TEST: Table outside EuiResizableContainer */}
+              <EuiPanel>
+                <EuiText size="m"><h4>Test Table (outside resizable)</h4></EuiText>
+                <EuiInMemoryTable
+                  items={displayedServices}
+                  columns={[{ field: 'serviceName', name: 'Service' }]}
+                  pagination={{ initialPageSize: 10, pageSizeOptions: [8, 10, 13] }}
+                  sorting={{ sort: { field: 'serviceName', direction: 'asc' } }}
+                  data-test-subj="testTable"
+                />
+              </EuiPanel>
+              <EuiSpacer size="m" />
+              {/* Main content with resizable filter sidebar */}
               <EuiResizableContainer>
                 {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
                   <>
@@ -1169,63 +1012,40 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
                       {/* Services Table */}
                       <EuiPanel>
-                        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="m">
-                              <h4>Service Catalog</h4>
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiFlexGroup gutterSize="s" alignItems="center">
-                              <EuiFlexItem grow={false}>
-                                <EuiText size="s">
-                                  <strong>Latency</strong>
-                                </EuiText>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonGroup
-                                  legend="Select latency percentile"
-                                  options={LATENCY_PERCENTILE_OPTIONS}
-                                  idSelected={latencyPercentile}
-                                  onChange={(id) =>
-                                    setLatencyPercentile(id as 'p99' | 'p90' | 'p50')
-                                  }
-                                  buttonSize="compressed"
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                        <EuiText size="m">
+                          <h4>Service Catalog</h4>
+                        </EuiText>
                         <EuiSpacer size="s" />
-                        {!isTableLoading && displayedServices.length === 0 ? (
+                        {!isLoading && displayedServices.length === 0 ? (
                           <EmptyState
                             title={i18nTexts.noMatching.title}
                             body={i18nTexts.noMatching.body}
                             iconType="search"
                           />
                         ) : (
-                          <EuiInMemoryTable
-                            items={isTableLoading ? [] : displayedServices}
-                            columns={columns}
-                            pagination={{
-                              initialPageSize: APM_CONSTANTS.DEFAULT_PAGE_SIZE,
-                              pageSizeOptions: [...APM_CONSTANTS.PAGE_SIZE_OPTIONS],
-                            }}
-                            sorting={{
-                              sort: {
-                                field: 'serviceName',
-                                direction: 'asc',
-                              },
-                            }}
-                            loading={isTableLoading}
-                            data-test-subj="servicesTable"
-                          />
+                            <EuiInMemoryTable
+                              items={isLoading ? [] : displayedServices}
+                              columns={columns}
+                              pagination={{
+                                initialPageSize: 10,
+                                pageSizeOptions: [8, 10, 13],
+                              }}
+                              sorting={{
+                                sort: {
+                                  field: 'serviceName',
+                                  direction: 'asc',
+                                },
+                              }}
+                              loading={isLoading}
+                              data-test-subj="servicesTable"
+                            />
                         )}
                       </EuiPanel>
                     </EuiResizablePanel>
                   </>
                 )}
               </EuiResizableContainer>
+              </>
             )}
           </EuiPageContentBody>
         </EuiPageContent>

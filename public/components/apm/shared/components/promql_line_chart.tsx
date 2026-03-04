@@ -104,14 +104,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
   // Initialize chart and handle loading/data updates
   useEffect(() => {
-    if (!chartRef.current || error) {
-      // Dispose chart when ref is null (empty state) or on error
-      if (chartInstance.current) {
-        chartInstance.current.dispose();
-        chartInstance.current = null;
-      }
-      return;
-    }
+    if (!chartRef.current) return;
 
     // Initialize chart if not already created
     if (!chartInstance.current) {
@@ -132,8 +125,9 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     // Hide loading
     chartInstance.current.hideLoading();
 
-    // Don't set options if no data
-    if (series.length === 0) {
+    // Clear chart on error or empty data instead of disposing
+    if (error || series.length === 0) {
+      chartInstance.current.clear();
       return;
     }
 
@@ -270,6 +264,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     };
 
     chartInstance.current.setOption(option, true);
+    chartInstance.current.resize();
   }, [
     series,
     isLoading,
@@ -299,11 +294,24 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Render error state
-  if (error) {
-    return (
-      <div className="promql-line-chart" style={{ height }}>
-        {title && <h4 className="promql-line-chart__title">{title}</h4>}
+  return (
+    <div
+      className="promql-line-chart"
+      style={{ height }}
+      data-test-subj={`lineChart-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
+    >
+      {title && <h4 className="promql-line-chart__title">{title}</h4>}
+      {/* Always mount chart div to prevent DOM reconciliation crash */}
+      <div
+        ref={chartRef}
+        className="promql-line-chart__chart"
+        style={{
+          height: title ? height - 24 : height,
+          display: !isLoading && (error || series.length === 0) ? 'none' : undefined,
+        }}
+      />
+      {/* Error overlay */}
+      {error && !isLoading && (
         <div className="promql-line-chart__error">
           <EuiIcon type="alert" size="l" color="danger" className="promql-line-chart__error-icon" />
           <EuiText size="s" className="promql-line-chart__error-message">
@@ -312,15 +320,9 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
             })}
           </EuiText>
         </div>
-      </div>
-    );
-  }
-
-  // Render empty state (only when not loading and no data)
-  if (!isLoading && series.length === 0) {
-    return (
-      <div className="promql-line-chart" style={{ height }}>
-        {title && <h4 className="promql-line-chart__title">{title}</h4>}
+      )}
+      {/* Empty overlay */}
+      {!error && !isLoading && series.length === 0 && (
         <div className="promql-line-chart__empty">
           <EuiIcon
             type="visLine"
@@ -334,22 +336,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
             })}
           </EuiText>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="promql-line-chart"
-      style={{ height }}
-      data-test-subj={`lineChart-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
-    >
-      {title && <h4 className="promql-line-chart__title">{title}</h4>}
-      <div
-        ref={chartRef}
-        className="promql-line-chart__chart"
-        style={{ height: title ? height - 24 : height }}
-      />
+      )}
     </div>
   );
 };
