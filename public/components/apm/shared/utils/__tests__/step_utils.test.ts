@@ -22,9 +22,9 @@ describe('step_utils', () => {
     });
 
     it('calculates step for 1h range with low resolution', () => {
-      // 1h = 3600s → durationMs = 3,600,000 → raw = 3600000/101 ≈ 35643ms → rounds to 50000ms → 50s
+      // 1h = 3600s → durationMs = 3,600,000 → raw = 3600000/50 = 72000ms → rounds to 100000ms → 100s
       const step = calculateStep(now, now + 3600, RESOLUTION_LOW);
-      expect(step).toBe(50);
+      expect(step).toBe(100);
     });
 
     it('calculates step for 24h range with medium resolution', () => {
@@ -67,8 +67,8 @@ describe('step_utils', () => {
   });
 
   describe('resolution constants', () => {
-    it('RESOLUTION_LOW is 101', () => {
-      expect(RESOLUTION_LOW).toBe(101);
+    it('RESOLUTION_LOW is 50', () => {
+      expect(RESOLUTION_LOW).toBe(50);
     });
 
     it('RESOLUTION_MEDIUM is 258', () => {
