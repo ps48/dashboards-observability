@@ -48,7 +48,7 @@ describe('ApmEmptyState', () => {
     expect(link).toBeInTheDocument();
     expect(link.closest('a')).toHaveAttribute(
       'href',
-      'https://docs.opensearch.org/latest/observing-your-data/'
+      'https://docs.aws.amazon.com/opensearch-service/latest/developerguide/observability-app-monitoring.html'
     );
   });
 
