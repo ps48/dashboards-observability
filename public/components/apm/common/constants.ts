@@ -8,7 +8,8 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 /**
  * APM Documentation URL
  */
-export const APM_DOCS_URL = 'https://docs.opensearch.org/latest/observing-your-data/';
+export const APM_DOCS_URL =
+  'https://docs.aws.amazon.com/opensearch-service/latest/developerguide/observability-app-monitoring.html';
 
 /**
  * APM Documentation URLs for settings modal
@@ -19,7 +20,8 @@ export const APM_SERVICE_MAP_DOCS_URL =
   'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor';
 export const APM_RED_METRICS_DOCS_URL =
   'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor#generated-metrics';
-export const APM_PIPELINE_DOCS_URL = 'https://observability.opensearch.org/docs/apm/';
+export const APM_PIPELINE_DOCS_URL =
+  'https://docs.aws.amazon.com/opensearch-service/latest/developerguide/observability-ingestion.html';
 export const APM_CORRELATIONS_DOCS_URL =
   'https://docs.opensearch.org/latest/observing-your-data/exploring-observability-data/correlations/#creating-a-trace-to-logs-correlation';
 
